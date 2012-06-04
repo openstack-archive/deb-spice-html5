@@ -1,0 +1,90 @@
+Bugs:
+
+  . In my latest Xorg/fluxbox theme test, I get flickering of title
+    windows, notably when you start up gimp.  That seems new.
+
+  . In Chrome, I've gotten it to get the parsing out of sync.
+    Not clear why or how to reproduce.  I've added a javascript
+    alert to hopefully make finding it more possible.
+    A test case is really needed for it...
+
+  . Drawing with Gimp is slow (lack of stream support?)
+
+  . If using xspice, you can get two bugs; a complete stall
+    (until you do something on the X server), or losing the mouse.
+    Both are probably related to that the watch_add/watch_update_mask functionality
+    in the qxl driver doesn't work.  A patch for that has been submitted
+    to spice-devel ('Actually process write watches in the wakeup handler').
+
+
+Medium Tasks:
+
+  . Get the mouse event code out of spicemsg (and make spicemsg
+    *only* about messages)
+
+  . Change the message processing to be able to handle
+    an array of ArrayBuffers so we don't have to 
+    use the combine function, which is presumed slow.
+
+  . Use the 'real' DataView if we have it
+
+  . Remove main() from quic.c and respin it
+      - It's causing unneeded bloat and memory use.
+
+  . Consider passing a status change event back to the front end
+    (e.g. indicators for numlock, connection status, all that jazz)
+
+  . Try to further Improve mouse position sends
+      - We now discard motions when we're more than 2 * SPICE_INPUT_MOTION_ACK_BUNCH
+        from an ack, just like the gtk client
+      - Other idea 1: queue them and only send when idle, but collapse first?
+      - Other idea 2: Time limit motion events
+
+  . The whole key code to scan code thing is awful and should be
+    taken out and shot...or revamped
+
+
+Big Tasks:
+
+  . Generate messages + enums from spice.proto
+
+  . Video + Audio:
+    - Need either ogg or webm codec
+    - Probably need a codec other than celt 0.51
+    - Need a way to feed stream into a media object
+      * Javascript uri?
+      * best would be  Media Source Extensions draft, but only in Chrome so far
+      * some trick with createObjectUrl?  see:
+        - http://dev.w3.org/2011/webrtc/editor/getusermedia.html
+
+  . Explore clipboard
+    - Supporting it may require unpleasant hacks
+
+  . Fully flesh out image type support; plt, glz, and jpeg/alpha are likely
+    to be real work
+
+  . Fix the many limitations of Draw operation support (clipping, masking,
+    scaling, and so on)
+
+  . Implement direct websocket support for the spice server
+
+  . Profile the whole mess
+    - Initial profiling suggests image decompression is the big hog
+
+  . Quic:  faster implementations
+      * current implementation is approximately 13x slower
+        than equivalent C code.  Should be able to do
+        much better than that.
+
+  . Implement agent support
+
+  . Build a test suite for measuring performance
+    - Latency, bandwidth, packet loss
+    - But how to quantify 'feel'?
+    - Suggestion:  recordmydesktop to capture videos
+        Use something like cxtest to create scripts
+        Do this with varying latency/bandwidth, etc
+        We can play videos side by side
+        And potentially use tool like MSU Video Quality Measurement Tool
+        (SSIM is the concept for measuring how much frames differ)
+    - Key metric - how much cpu / memory / bandwidth per 'active' user

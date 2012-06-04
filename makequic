@@ -1,0 +1,8 @@
+./emcc -o quic.js --shell-file quic.shell quic.c
+echo Okay, quic.js is partly ready.  Three things to do:
+echo 1.  In function _quic_decode_js, after the call to  simple_quic_decode,
+echo     add the code as given by quic.shell
+echo 2.  Delete the run() 3 line block near the bottom.
+echo 3.  Add the getQuic() function to the bottom (see quic.shell)
+        
+
