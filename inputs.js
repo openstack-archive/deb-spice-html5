@@ -18,6 +18,15 @@
    along with spice-html5.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*----------------------------------------------------------------------------
+ ** Modifier Keystates
+ **     These need to be tracked because focus in and out can get the keyboard
+ **     out of sync.
+ **------------------------------------------------------------------------*/
+var Shift_state = -1;
+var Ctrl_state = -1;
+var Alt_state = -1;
+var Meta_state = -1;
 
 /*----------------------------------------------------------------------------
 **  SpiceInputsConn
@@ -146,6 +155,7 @@ function handle_keydown(e)
 {
     var key = new SpiceMsgcKeyDown(e)
     var msg = new SpiceMiniData();
+    check_and_update_modifiers(e, key.code, this.sc);
     msg.build_msg(SPICE_MSGC_INPUTS_KEY_DOWN, key);
     if (this.sc && this.sc.inputs)
         this.sc.inputs.send_msg(msg);
@@ -157,9 +167,85 @@ function handle_keyup(e)
 {
     var key = new SpiceMsgcKeyUp(e)
     var msg = new SpiceMiniData();
+    check_and_update_modifiers(e, key.code, this.sc);
     msg.build_msg(SPICE_MSGC_INPUTS_KEY_UP, key);
     if (this.sc && this.sc.inputs)
         this.sc.inputs.send_msg(msg);
 
     e.preventDefault();
+}
+
+function update_modifier(state, code, sc)
+{
+    var msg = new SpiceMiniData();
+    if (!state)
+    {
+        var key = new SpiceMsgcKeyUp()
+        key.code =(0x80|code);
+        msg.build_msg(SPICE_MSGC_INPUTS_KEY_UP, key);
+    }
+    else
+    {
+        var key = new SpiceMsgcKeyDown()
+        key.code = code;
+        msg.build_msg(SPICE_MSGC_INPUTS_KEY_DOWN, key);
+    }
+
+    sc.inputs.send_msg(msg);
+}
+
+function check_and_update_modifiers(e, code, sc)
+{
+    if (Shift_state === -1)
+    {
+        Shift_state = e.shiftKey;
+        Ctrl_state = e.ctrlKey;
+        Alt_state = e.altKey;
+        Meta_state = e.metaKey;
+    }
+
+    if (code === KEY_ShiftL)
+        Shift_state = true;
+    else if (code === KEY_Alt)
+        Alt_state = true;
+    else if (code === KEY_LCtrl)
+        Ctrl_state = true;
+    else if (code === 0xE0B5)
+        Meta_state = true;
+    else if (code === (0x80|KEY_ShiftL))
+        Shift_state = false;
+    else if (code === (0x80|KEY_Alt))
+        Alt_state = false;
+    else if (code === (0x80|KEY_LCtrl))
+        Ctrl_state = false;
+    else if (code === (0x80|0xE0B5))
+        Meta_state = false;
+
+    if (sc && sc.inputs)
+    {
+        if (Shift_state != e.shiftKey)
+        {
+            console.log("Shift state out of sync");
+            update_modifier(e.shiftKey, KEY_ShiftL, sc);
+            Shift_state = e.shiftKey;
+        }
+        if (Alt_state != e.altKey)
+        {
+            console.log("Alt state out of sync");
+            update_modifier(e.altKey, KEY_Alt, sc);
+            Alt_state = e.altKey;
+        }
+        if (Ctrl_state != e.ctrlKey)
+        {
+            console.log("Ctrl state out of sync");
+            update_modifier(e.ctrlKey, KEY_LCtrl, sc);
+            Ctrl_state = e.ctrlKey;
+        }
+        if (Meta_state != e.metaKey)
+        {
+            console.log("Meta state out of sync");
+            update_modifier(e.metaKey, 0xE0B5, sc);
+            Meta_state = e.metaKey;
+        }
+    }
 }
