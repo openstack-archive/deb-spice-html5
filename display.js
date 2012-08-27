@@ -421,6 +421,72 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_CREATE)
+    {
+        var m = new SpiceMsgDisplayStreamCreate(msg.data);
+        DEBUG > 1 && console.log(this.type + ": MsgStreamCreate id" + m.id);
+        if (!this.streams)
+            this.streams = new Array();
+        if (this.streams[m.id])
+            console.log("Stream already exists");
+        else
+            this.streams[m.id] = m;
+        if (m.codec_type != SPICE_VIDEO_CODEC_TYPE_MJPEG)
+            console.log("Unhandled stream codec: "+m.codec_type);
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DATA)
+    {
+        var m = new SpiceMsgDisplayStreamData(msg.data);
+        if (!this.streams[m.base.id])
+        {
+            console.log("no stream for data");
+            return false;
+        }
+        if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
+        {
+            var tmpstr = "data:image/jpeg,";
+            var img = new Image;
+            var i;
+            for (i = 0; i < m.data.length; i++)
+            {
+                tmpstr +=  '%';
+                if (m.data[i] < 16)
+                tmpstr += '0';
+                tmpstr += m.data[i].toString(16);
+            }
+            var strm_base = new SpiceMsgDisplayBase();
+            strm_base.surface_id = this.streams[m.base.id].surface_id;
+            strm_base.box = this.streams[m.base.id].dest;
+            strm_base.clip = this.streams[m.base.id].clip;
+            img.o =
+                { base: strm_base,
+                  tag: "mjpeg." + m.base.id,
+                  descriptor: null,
+                  sc : this,
+                };
+            img.onload = handle_draw_jpeg_onload;
+            img.src = tmpstr;
+        }
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_CLIP)
+    {
+        var m = new SpiceMsgDisplayStreamClip(msg.data);
+        DEBUG > 1 && console.log(this.type + ": MsgStreamClip id" + m.id);
+        this.streams[m.id].clip = m.clip;
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DESTROY)
+    {
+        var m = new SpiceMsgDisplayStreamDestroy(msg.data);
+        DEBUG > 1 && console.log(this.type + ": MsgStreamDestroy id" + m.id);
+        this.streams[m.id] = undefined;
+        return true;
+    }
 
     return false;
 }

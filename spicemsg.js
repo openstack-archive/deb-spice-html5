@@ -789,3 +789,95 @@ function SpiceMsgcKeyUp(e)
 /* Use the same functions as for KeyDown */
 SpiceMsgcKeyUp.prototype.to_buffer = SpiceMsgcKeyDown.prototype.to_buffer;
 SpiceMsgcKeyUp.prototype.buffer_size = SpiceMsgcKeyDown.prototype.buffer_size;
+
+function SpiceMsgDisplayStreamCreate(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgDisplayStreamCreate.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.surface_id = dv.getUint32(at, true); at += 4;
+        this.id = dv.getUint32(at, true); at += 4;
+        this.flags = dv.getUint8(at, true); at += 1;
+        this.codec_type = dv.getUint8(at, true); at += 1;
+        /*stamp */ at += 8;
+        this.stream_width = dv.getUint32(at, true); at += 4;
+        this.stream_height = dv.getUint32(at, true); at += 4;
+        this.src_width = dv.getUint32(at, true); at += 4;
+        this.src_height = dv.getUint32(at, true); at += 4;
+
+        this.dest = new SpiceRect;
+        at = this.dest.from_dv(dv, at, a);
+        this.clip = new SpiceClip;
+        this.clip.from_dv(dv, at, a);
+    },
+}
+
+function SpiceStreamDataHeader(a, at)
+{
+}
+
+SpiceStreamDataHeader.prototype =
+{
+    from_dv : function(dv, at, mb)
+    {
+        this.id = dv.getUint32(at, true); at += 4;
+        this.multi_media_time = dv.getUint32(at, true); at += 4;
+        return at;
+    },
+}
+
+function SpiceMsgDisplayStreamData(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgDisplayStreamData.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.base = new SpiceStreamDataHeader;
+        at = this.base.from_dv(dv, at, a);
+        this.data_size = dv.getUint32(at, true); at += 4;
+        this.data = dv.u8.subarray(at, at + this.data_size);
+    },
+}
+
+function SpiceMsgDisplayStreamClip(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgDisplayStreamClip.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.id = dv.getUint32(at, true); at += 4;
+        this.clip = new SpiceClip;
+        this.clip.from_dv(dv, at, a);
+    },
+}
+
+function SpiceMsgDisplayStreamDestroy(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgDisplayStreamDestroy.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.id = dv.getUint32(at, true); at += 4;
+    },
+}
