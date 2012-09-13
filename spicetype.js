@@ -236,14 +236,8 @@ SpiceImage.prototype =
 
         if (this.descriptor.type == SPICE_IMAGE_TYPE_QUIC)
         {
-            var tmparr = [];
-            var i;
-            this.quicr_length = dv.getUint32(at, true); at += 4;
-            var qdv = new Uint8Array(mb.slice(at));
-            for (i = 0; i < qdv.length; i++)
-                tmparr[i] = qdv[i];
-            this.quic = getQuic(tmparr);
-            at += qdv.length;
+            this.quic = new SpiceQuic;
+            at = this.quic.from_dv(dv, at, mb);
         }
         return at;
     },

@@ -28,9 +28,6 @@ Medium Tasks:
 
   . Use the 'real' DataView if we have it
 
-  . Remove main() from quic.c and respin it
-      - It's causing unneeded bloat and memory use.
-
   . Consider passing a status change event back to the front end
     (e.g. indicators for numlock, connection status, all that jazz)
 
@@ -70,11 +67,6 @@ Big Tasks:
 
   . Profile the whole mess
     - Initial profiling suggests image decompression is the big hog
-
-  . Quic:  faster implementations
-      * current implementation is approximately 13x slower
-        than equivalent C code.  Should be able to do
-        much better than that.
 
   . Implement agent support
 

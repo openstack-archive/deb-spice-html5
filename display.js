@@ -50,9 +50,6 @@ function stripAlpha(d)
         d.data[i + 3] = 255;
 }
 
-// FIXME - this is a hack for quic.js, I should fix this...
-var global_ctx;
-
 /*----------------------------------------------------------------------------
 **  SpiceDisplayConn
 **      Drive the Spice Display Channel
@@ -108,16 +105,19 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
 
             if (draw_copy.data.src_bitmap.descriptor.type == SPICE_IMAGE_TYPE_QUIC)
             {
+                var canvas = this.surfaces[draw_copy.base.surface_id].canvas;
                 if (! draw_copy.data.src_bitmap.quic)
                 {
                     this.log_warn("FIXME: DrawCopy could not handle this QUIC file.");
                     return false;
                 }
+                var source_img = convert_spice_quic_to_web(canvas.context,
+                                        draw_copy.data.src_bitmap.quic);
 
                 return this.draw_copy_helper(
                     { base: draw_copy.base,
                       src_area: draw_copy.data.src_area,
-                      image_data: draw_copy.data.src_bitmap.quic.imgData,
+                      image_data: source_img,
                       tag: "copyquic." + draw_copy.data.src_bitmap.quic.type,
                       has_alpha: (draw_copy.data.src_bitmap.quic.type == QUIC_IMAGE_TYPE_RGBA ? true : false) ,
                       descriptor : draw_copy.data.src_bitmap.descriptor
@@ -404,7 +404,6 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
 
             /* This .save() is done entirely to enable SPICE_MSG_DISPLAY_RESET */
             canvas.context.save();
-            global_ctx = canvas.context; // FIXME - this is a hack entirely for the emscripten quic.js
             document.getElementById(this.parent.screen_id).appendChild(canvas);
             document.getElementById(this.parent.screen_id).setAttribute('width', m.surface.width);
             document.getElementById(this.parent.screen_id).setAttribute('height', m.surface.height);
