@@ -957,6 +957,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row = function (prev_row, cur_row)
     }
 }
 
+/* We need to be generating rgb32 or rgba */
 QuicEncoder.prototype.quic_decode = function(buf, stride)
 {
     var row;
@@ -966,6 +967,7 @@ QuicEncoder.prototype.quic_decode = function(buf, stride)
     switch (this.type)
     {
         case QUIC_IMAGE_TYPE_RGB32:
+        case QUIC_IMAGE_TYPE_RGB24:
             this.channels[0].correlate_row.zero = 0;
             this.channels[1].correlate_row.zero = 0;
             this.channels[2].correlate_row.zero = 0;
@@ -982,10 +984,6 @@ QuicEncoder.prototype.quic_decode = function(buf, stride)
                 this.quic_rgb32_uncompress_row(prev, cur);
                 this.rows_completed++;
             };
-            break;
-        case QUIC_IMAGE_TYPE_RGB24:
-            console.log("quic: unsupported output format\n");
-            return false;
             break;
         case QUIC_IMAGE_TYPE_RGB16:
             console.log("quic: unsupported output format\n");
@@ -1014,7 +1012,7 @@ QuicEncoder.prototype.simple_quic_decode = function(buf)
     var stride = 4; /* FIXME - proper stride calc please */
     if (!this.quic_decode_begin(buf))
         return undefined;
-    if (this.type != QUIC_IMAGE_TYPE_RGB32 && this.type != QUIC_IMAGE_TYPE_RGBA)
+    if (this.type != QUIC_IMAGE_TYPE_RGB32 && this.type != QUIC_IMAGE_TYPE_RGB24)
         return undefined;
     var out = new Uint8Array(this.width*this.height*4);
     out[0] = 69;
@@ -1057,7 +1055,7 @@ function convert_spice_quic_to_web(context, spice_quic)
         ret.data[i + 0] = spice_quic.outptr[i + 2];
         ret.data[i + 1] = spice_quic.outptr[i + 1];
         ret.data[i + 2] = spice_quic.outptr[i + 0];
-        if (spice_quic.type == 4)
+        if (spice_quic.type !== QUIC_IMAGE_TYPE_RGBA)
             ret.data[i + 3] = 255;
         else
             ret.data[i + 3] = spice_quic.outptr[i + 3];
