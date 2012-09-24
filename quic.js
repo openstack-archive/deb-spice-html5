@@ -330,11 +330,11 @@ QuicModel.prototype = {
 
 function QuicBucket()
 {
+    this.counters = [0,0,0,0,0,0,0,0];
 }
 
 QuicBucket.prototype = {
     bestcode: 0,
-    counters: [0,0,0,0,0,0,0,0],
 
     reste : function (bpp)
     {
@@ -372,11 +372,11 @@ QuicBucket.prototype = {
 
 function QuicFamilyStat()
 {
+    this.buckets_ptrs = [];
+    this.buckets_buf = [];
 }
 
 QuicFamilyStat.prototype = {
-    buckets_ptrs : [],
-    buckets_buf : [],
 
     fill_model_structures : function(model)
     {
@@ -421,14 +421,11 @@ function QuicChannel(model_8bpc, model_5bpc)
 {
     this.state = new CommonState;
     this.family_stat_8bpc = new QuicFamilyStat;
-    this.family_stat_8bpc.buckets_ptrs = [];
-    this.family_stat_8bpc.buckets_buf = [];
     this.family_stat_5bpc = new QuicFamilyStat;
-    this.family_stat_5bpc.buckets_ptrs = [];
-    this.family_stat_5bpc.buckets_buf = [];
     this.correlate_row = { zero: 0 , row:[] };
     this.model_8bpc = model_8bpc;
     this.model_5bpc = model_5bpc;
+    this.buckets_ptrs = [];
 
     if (!this.family_stat_8bpc.fill_model_structures(this.model_8bpc))
         return undefined;
@@ -438,11 +435,6 @@ function QuicChannel(model_8bpc, model_5bpc)
 }
 
 QuicChannel.prototype = {
-    correlate_row : {},
-    state : CommonState,
-    family_stat_8bpc : QuicFamilyStat,
-    family_stat_5bpc : QuicFamilyStat,
-    buckets_ptrs: [],
 
     find_bucket_8bpc : function(val)
     {
@@ -524,6 +516,7 @@ function QuicEncoder()
     this.rgb_state = new CommonState;
     this.model_8bpc = new QuicModel(8);
     this.model_5bpc = new QuicModel(5);
+    this.channels = [];
 
     var i;
     for (i = 0; i < 4; i++) {
@@ -547,7 +540,6 @@ QuicEncoder.prototype = {
                     io_now: 0,
                     io_end: 0,
                     rows_completed: 0,
-                    channels: []
               };
 
 QuicEncoder.prototype.reste = function(io_ptr)
