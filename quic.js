@@ -436,11 +436,6 @@ function QuicChannel(model_8bpc, model_5bpc)
 
 QuicChannel.prototype = {
 
-    find_bucket_8bpc : function(val)
-    {
-        return this.buckets_ptrs[val];
-    },
-
     reste : function (bpc)
     {
         this.correlate_row = { zero: 0 , row: []};
@@ -652,7 +647,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
         c = 0;
         do
         {
-            a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.zero).bestcode, this.io_word);
+            a = golomb_decoding_8bpc(this.channels[c].buckets_ptrs[this.channels[c].correlate_row.zero].bestcode, this.io_word);
             this.channels[c].correlate_row.row[0] = a.rc;
             cur_row[2-c] = (family_8bpc.xlatL2U[a.rc]&0xFF);
             this.decode_eatbits(a.codewordlen);
@@ -665,7 +660,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
             c = 0;
             do
             {
-                this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.zero).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[0], bpc);
+                this.channels[c].buckets_ptrs[this.channels[c].correlate_row.zero].update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[0], bpc);
             } while (++c < n_channels);
         }
         stopidx = ++i + this.rgb_state.waitcnt;
@@ -681,7 +676,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
             c = 0;
             do
             {
-                a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[i - 1]).bestcode, this.io_word);
+                a = golomb_decoding_8bpc(this.channels[c].buckets_ptrs[this.channels[c].correlate_row.row[i - 1]].bestcode, this.io_word);
                 this.channels[c].correlate_row.row[i] = a.rc;
                 cur_row[(i* rgb32_pixel_size)+(2-c)] = (family_8bpc.xlatL2U[a.rc] + cur_row[((i-1) * rgb32_pixel_size) + (2-c)]) & bpc_mask;
                 this.decode_eatbits(a.codewordlen);
@@ -690,7 +685,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
         c = 0;
         do
         {
-            this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[stopidx - 1]).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[stopidx], bpc);
+            this.channels[c].buckets_ptrs[this.channels[c].correlate_row.row[stopidx - 1]].update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[stopidx], bpc);
         } while (++c < n_channels);
         stopidx = i + (this.rgb_state.tabrand() & waitmask);
     }
@@ -702,7 +697,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
         c = 0;
         do
         {
-            a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[i - 1]).bestcode, this.io_word);
+            a = golomb_decoding_8bpc(this.channels[c].buckets_ptrs[this.channels[c].correlate_row.row[i - 1]].bestcode, this.io_word);
             this.channels[c].correlate_row.row[i] = a.rc;
             cur_row[(i* rgb32_pixel_size)+(2-c)] = (family_8bpc.xlatL2U[a.rc] + cur_row[((i-1) * rgb32_pixel_size) + (2-c)]) & bpc_mask;
             this.decode_eatbits(a.codewordlen);
@@ -759,7 +754,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
 
         c = 0;
         do {
-            a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.zero).bestcode, this.io_word);
+            a = golomb_decoding_8bpc(this.channels[c].buckets_ptrs[this.channels[c].correlate_row.zero].bestcode, this.io_word);
             this.channels[c].correlate_row.row[0] = a.rc;
             cur_row[2-c] = (family_8bpc.xlatL2U[this.channels[c].correlate_row.row[0]] + prev_row[2-c]) & bpc_mask;
             this.decode_eatbits(a.codewordlen);
@@ -771,7 +766,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
             this.rgb_state.waitcnt = (this.rgb_state.tabrand() & waitmask);
             c = 0;
             do {
-                this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.zero).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[0], bpc);
+                this.channels[c].buckets_ptrs[this.channels[c].correlate_row.zero].update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[0], bpc);
             } while (++c < n_channels);
         }
         stopidx = ++i + this.rgb_state.waitcnt;
@@ -779,7 +774,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
         stopidx = i + this.rgb_state.waitcnt;
     }
     for (;;) {
-        rc = 0;
+        var rc = 0;
         while (stopidx < end && !rc) {
             for (; i <= stopidx && !rc; i++) {
                 var pixel = i * rgb32_pixel_size;
@@ -822,7 +817,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
                     var cc = this.channels[c];
                     var cr = cc.correlate_row;
 
-                    a = golomb_decoding_8bpc(cc.find_bucket_8bpc(cr.row[i-1]).bestcode, this.io_word);
+                    a = golomb_decoding_8bpc(cc.buckets_ptrs[cr.row[i-1]].bestcode, this.io_word);
                     cr.row[i] = a.rc;
                 cur_row[pixel+(2-c)] = (family_8bpc.xlatL2U[a.rc] + ((cur_row[pixelm1+(2-c)] + prev_row[pixel+(2-c)]) >> 1)) & bpc_mask;
                     this.decode_eatbits(a.codewordlen);
@@ -833,7 +828,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
 
             c = 0;
             do {
-                this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[stopidx - 1]).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[stopidx], bpc);
+                this.channels[c].buckets_ptrs[this.channels[c].correlate_row.row[stopidx - 1]].update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[stopidx], bpc);
             } while (++c < n_channels);
 
             stopidx = i + (this.rgb_state.tabrand() & waitmask);
@@ -878,7 +873,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
             c = 0;
             do
             {
-                a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[i-1]).bestcode, this.io_word);
+                a = golomb_decoding_8bpc(this.channels[c].buckets_ptrs[this.channels[c].correlate_row.row[i-1]].bestcode, this.io_word);
                 this.channels[c].correlate_row.row[i] = a.rc;
                 cur_row[pixel+(2-c)] = (family_8bpc.xlatL2U[a.rc] + ((cur_row[pixelm1+(2-c)] + prev_row[pixel+(2-c)]) >> 1)) & bpc_mask;
                 this.decode_eatbits(a.codewordlen);
