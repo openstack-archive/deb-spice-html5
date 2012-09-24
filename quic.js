@@ -748,16 +748,12 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
     var waitmask = bppmask[this.rgb_state.wmidx];
 
     var a;
-    var b = {
-              i: i,
-              run_index: 0,
-              stopidx: 0,
-              run_end: 0,
-              end : end
-            };
+    var run_index = 0;
+    var stopidx = 0;
+    var run_end = 0;
     var c;
 
-    if (!b.i)
+    if (!i)
     {
         cur_row[rgb32_pixel_pad] = 0;
 
@@ -778,25 +774,45 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
                 this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.zero).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[0], bpc);
             } while (++c < n_channels);
         }
-        b.stopidx = ++b.i + this.rgb_state.waitcnt;
+        stopidx = ++i + this.rgb_state.waitcnt;
     } else {
-        b.stopidx = b.i + this.rgb_state.waitcnt;
+        stopidx = i + this.rgb_state.waitcnt;
     }
     for (;;) {
-        b.rc = 0;
-        while (b.stopidx < b.end && !b.rc) {
-            for (; b.i <= b.stopidx && !b.rc; b.i++) {
-                var pixel = b.i * rgb32_pixel_size;
-                var pixelm1 = (b.i-1) * rgb32_pixel_size;
-                var pixelm2 = (b.i-2) * rgb32_pixel_size;
+        rc = 0;
+        while (stopidx < end && !rc) {
+            for (; i <= stopidx && !rc; i++) {
+                var pixel = i * rgb32_pixel_size;
+                var pixelm1 = (i-1) * rgb32_pixel_size;
+                var pixelm2 = (i-2) * rgb32_pixel_size;
 
                 if ( prev_row[pixelm1+rgb32_pixel_r] == prev_row[pixel+rgb32_pixel_r] && prev_row[pixelm1+rgb32_pixel_g] == prev_row[pixel+rgb32_pixel_g] && prev_row[pixelm1 + rgb32_pixel_b] == prev_row[pixel+rgb32_pixel_b])
                 {
-                    if (b.run_index != b.i && b.i > 2 && (cur_row[pixelm1+rgb32_pixel_r] == cur_row[pixelm2+rgb32_pixel_r] && cur_row[pixelm1+rgb32_pixel_g] == cur_row[pixelm2+rgb32_pixel_g] && cur_row[pixelm1+rgb32_pixel_b] == cur_row[pixelm2+rgb32_pixel_b]))
+                    if (run_index != i && i > 2 && (cur_row[pixelm1+rgb32_pixel_r] == cur_row[pixelm2+rgb32_pixel_r] && cur_row[pixelm1+rgb32_pixel_g] == cur_row[pixelm2+rgb32_pixel_g] && cur_row[pixelm1+rgb32_pixel_b] == cur_row[pixelm2+rgb32_pixel_b]))
                     {
-                        this.do_run(b, cur_row);
-                        if (b.rc === 2) return;
-                        else break;
+                        /* do run */
+                        this.rgb_state.waitcnt = stopidx - i;
+                        run_index = i;
+                        run_end = i + this.decode_run();
+
+                        for (; i < run_end; i++) {
+                            var pixel = i * rgb32_pixel_size;
+                            var pixelm1 = (i-1) * rgb32_pixel_size;
+                            cur_row[pixel+rgb32_pixel_pad] = 0;
+                            cur_row[pixel+rgb32_pixel_r] = cur_row[pixelm1+rgb32_pixel_r];
+                            cur_row[pixel+rgb32_pixel_g] = cur_row[pixelm1+rgb32_pixel_g];
+                            cur_row[pixel+rgb32_pixel_b] = cur_row[pixelm1+rgb32_pixel_b];
+                        }
+
+                        if (i == end) {
+                            return;
+                        }
+                        else
+                        {
+                            stopidx = i + this.rgb_state.waitcnt;
+                            rc = 1;
+                            break;
+                        }
                     }
                 }
 
@@ -806,35 +822,55 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
                     var cc = this.channels[c];
                     var cr = cc.correlate_row;
 
-                    a = golomb_decoding_8bpc(cc.find_bucket_8bpc(cr.row[b.i-1]).bestcode, this.io_word);
-                    cr.row[b.i] = a.rc;
+                    a = golomb_decoding_8bpc(cc.find_bucket_8bpc(cr.row[i-1]).bestcode, this.io_word);
+                    cr.row[i] = a.rc;
                 cur_row[pixel+(2-c)] = (family_8bpc.xlatL2U[a.rc] + ((cur_row[pixelm1+(2-c)] + prev_row[pixel+(2-c)]) >> 1)) & bpc_mask;
                     this.decode_eatbits(a.codewordlen);
                 } while (++c < n_channels);
             }
-            if (b.rc)
+            if (rc)
                 break;
 
             c = 0;
             do {
-                this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[b.stopidx - 1]).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[b.stopidx], bpc);
+                this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[stopidx - 1]).update_model_8bpc(this.rgb_state, this.channels[c].correlate_row.row[stopidx], bpc);
             } while (++c < n_channels);
 
-            b.stopidx = b.i + (this.rgb_state.tabrand() & waitmask);
+            stopidx = i + (this.rgb_state.tabrand() & waitmask);
         }
 
-        for (; b.i < b.end && !b.rc; b.i++) {
-            var pixel = b.i * rgb32_pixel_size;
-            var pixelm1 = (b.i-1) * rgb32_pixel_size;
-            var pixelm2 = (b.i-2) * rgb32_pixel_size;
+        for (; i < end && !rc; i++) {
+            var pixel = i * rgb32_pixel_size;
+            var pixelm1 = (i-1) * rgb32_pixel_size;
+            var pixelm2 = (i-2) * rgb32_pixel_size;
 
             if (prev_row[pixelm1+rgb32_pixel_r] == prev_row[pixel+rgb32_pixel_r] && prev_row[pixelm1+rgb32_pixel_g] == prev_row[pixel+rgb32_pixel_g] && prev_row[pixelm1+rgb32_pixel_b] == prev_row[pixel+rgb32_pixel_b])
             {
-                if (b.run_index != b.i && b.i > 2 && (cur_row[pixelm1+rgb32_pixel_r] == cur_row[pixelm2+rgb32_pixel_r] && cur_row[pixelm1+rgb32_pixel_g] == cur_row[pixelm2+rgb32_pixel_g] && cur_row[pixelm1+rgb32_pixel_b] == cur_row[pixelm2+rgb32_pixel_b]))
+                if (run_index != i && i > 2 && (cur_row[pixelm1+rgb32_pixel_r] == cur_row[pixelm2+rgb32_pixel_r] && cur_row[pixelm1+rgb32_pixel_g] == cur_row[pixelm2+rgb32_pixel_g] && cur_row[pixelm1+rgb32_pixel_b] == cur_row[pixelm2+rgb32_pixel_b]))
                 {
-                    this.do_run(b, cur_row);
-                    if (b.rc==2) return;
-                    else break;
+                    /* do run */
+                    this.rgb_state.waitcnt = stopidx - i;
+                    run_index = i;
+                    run_end = i + this.decode_run();
+
+                    for (; i < run_end; i++) {
+                        var pixel = i * rgb32_pixel_size;
+                        var pixelm1 = (i-1) * rgb32_pixel_size;
+                        cur_row[pixel+rgb32_pixel_pad] = 0;
+                        cur_row[pixel+rgb32_pixel_r] = cur_row[pixelm1+rgb32_pixel_r];
+                        cur_row[pixel+rgb32_pixel_g] = cur_row[pixelm1+rgb32_pixel_g];
+                        cur_row[pixel+rgb32_pixel_b] = cur_row[pixelm1+rgb32_pixel_b];
+                    }
+
+                    if (i == end) {
+                        return;
+                    }
+                    else
+                    {
+                        stopidx = i + this.rgb_state.waitcnt;
+                        rc = 1;
+                        break;
+                    }
                 }
             }
 
@@ -842,16 +878,16 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
             c = 0;
             do
             {
-                a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[b.i-1]).bestcode, this.io_word);
-                this.channels[c].correlate_row.row[b.i] = a.rc;
+                a = golomb_decoding_8bpc(this.channels[c].find_bucket_8bpc(this.channels[c].correlate_row.row[i-1]).bestcode, this.io_word);
+                this.channels[c].correlate_row.row[i] = a.rc;
                 cur_row[pixel+(2-c)] = (family_8bpc.xlatL2U[a.rc] + ((cur_row[pixelm1+(2-c)] + prev_row[pixel+(2-c)]) >> 1)) & bpc_mask;
                 this.decode_eatbits(a.codewordlen);
             } while (++c < n_channels);
         }
 
-          if (!b.rc)
+          if (!rc)
           {
-            this.rgb_state.waitcnt = b.stopidx - b.end;
+            this.rgb_state.waitcnt = stopidx - end;
             return;
           }
         }
@@ -895,30 +931,6 @@ QuicEncoder.prototype.decode_run = function()
     }
 
     return runlen;
-}
-
-QuicEncoder.prototype.do_run = function(b, cur_row)
-{
-    this.rgb_state.waitcnt = b.stopidx - b.i;
-    b.run_index = b.i;
-    b.run_end = b.i + this.decode_run();
-
-    for (; b.i < b.run_end; b.i++) {
-        var pixel = b.i * rgb32_pixel_size;
-        var pixelm1 = (b.i-1) * rgb32_pixel_size;
-        cur_row[pixel+rgb32_pixel_pad] = 0;
-        cur_row[pixel+rgb32_pixel_r] = cur_row[pixelm1+rgb32_pixel_r];
-        cur_row[pixel+rgb32_pixel_g] = cur_row[pixelm1+rgb32_pixel_g];
-        cur_row[pixel+rgb32_pixel_b] = cur_row[pixelm1+rgb32_pixel_b];
-    }
-
-    if (b.i == b.end) {
-        b.rc = 2;
-        return;
-    }
-
-    b.stopidx = b.i + this.rgb_state.waitcnt;
-    b.rc = 1;
 }
 
 QuicEncoder.prototype.quic_rgb32_uncompress_row = function (prev_row, cur_row)
