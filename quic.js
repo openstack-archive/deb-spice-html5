@@ -942,6 +942,245 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row = function (prev_row, cur_row)
     }
 }
 
+QuicEncoder.prototype.quic_four_uncompress_row0_seg = function (channel, i,
+                                       correlate_row, cur_row, end, waitmask,
+                                       bpc, bpc_mask)
+{
+    var stopidx;
+    var a;
+
+    if (i == 0) {
+        a = golomb_decoding_8bpc(channel.buckets_ptrs[correlate_row.zero].bestcode, this.io_word);
+        correlate_row.row[0] = a.rc;
+        cur_row[rgb32_pixel_pad] = family_8bpc.xlatL2U[a.rc];
+        this.decode_eatbits(a.codewordlen);
+
+        if (channel.state.waitcnt) {
+            --channel.state.waitcnt;
+        } else {
+            channel.state.waitcnt = (channel.state.tabrand() & waitmask);
+            channel.buckets_ptrs[correlate_row.zero].update_model_8bpc(channel.state, correlate_row.row[0], bpc);
+        }
+        stopidx = ++i + channel.state.waitcnt;
+    } else {
+        stopidx = i + channel.state.waitcnt;
+    }
+
+    while (stopidx < end) {
+        var pbucket;
+
+        for (; i <= stopidx; i++) {
+            pbucket = channel.buckets_ptrs[correlate_row.row[i - 1]];
+
+            a = golomb_decoding_8bpc(pbucket.bestcode, this.io_word);
+            correlate_row.row[i] = a.rc;
+            cur_row[(i*rgb32_pixel_size)+rgb32_pixel_pad] = (family_8bpc.xlatL2U[a.rc] + cur_row[((i-1)*rgb32_pixel_size)+rgb32_pixel_pad]) & bpc_mask;
+            this.decode_eatbits(a.codewordlen);
+        }
+
+        pbucket.update_model_8bpc(channel.state, correlate_row.row[stopidx], bpc);
+
+        stopidx = i + (channel.state.tabrand() & waitmask);
+    }
+
+    for (; i < end; i++) {
+        a = golomb_decoding_8bpc(channel.buckets_ptrs[correlate_row.row[i-1]].bestcode, this.io_word);
+
+        correlate_row.row[i] = a.rc;
+        cur_row[(i*rgb32_pixel_size)+rgb32_pixel_pad] = (family_8bpc.xlatL2U[a.rc] + cur_row[((i-1)*rgb32_pixel_size)+rgb32_pixel_pad]) & bpc_mask;
+        this.decode_eatbits(a.codewordlen);
+    }
+    channel.state.waitcnt = stopidx - end;
+}
+
+QuicEncoder.prototype.quic_four_uncompress_row0 = function(channel, cur_row)
+{
+    var bpc = 8;
+    var bpc_mask = 0xff;
+    var correlate_row = channel.correlate_row;
+    var pos = 0;
+    var width = this.width;
+
+    while ((wmimax > channel.state.wmidx) && (channel.state.wmileft <= width)) {
+        if (channel.state.wmileft) {
+            this.quic_four_uncompress_row0_seg(channel, pos, correlate_row, cur_row,
+                                       pos + channel.state.wmileft, bppmask[channel.state.wmidx],
+                                       bpc, bpc_mask);
+            pos += channel.state.wmileft;
+            width -= channel.state.wmileft;
+        }
+
+        channel.state.wmidx++;
+        channel.state.set_wm_trigger();
+        channel.state.wmileft = wminext;
+    }
+
+    if (width) {
+        this.quic_four_uncompress_row0_seg(channel, pos, correlate_row, cur_row, pos + width,
+                                   bppmask[channel.state.wmidx], bpc, bpc_mask);
+        if (wmimax > channel.state.wmidx) {
+            channel.state.wmileft -= width;
+        }
+    }
+}
+
+QuicEncoder.prototype.quic_four_uncompress_row_seg = function (channel,
+                                      correlate_row, prev_row, cur_row, i,
+                                      end, bpc, bpc_mask)
+{
+    var waitmask = bppmask[channel.state.wmidx];
+    var stopidx;
+
+    var run_index = 0;
+    var run_end;
+
+    var a;
+
+    if (i == 0) {
+        a = golomb_decoding_8bpc(channel.buckets_ptrs[correlate_row.zero].bestcode, this.io_word);
+
+        correlate_row.row[0] = a.rc
+        cur_row[rgb32_pixel_pad] = (family_8bpc.xlatL2U[a.rc] + prev_row[rgb32_pixel_pad]) & bpc_mask;
+        this.decode_eatbits(a.codewordlen);
+
+        if (channel.state.waitcnt) {
+            --channel.state.waitcnt;
+        } else {
+            channel.state.waitcnt = (channel.state.tabrand() & waitmask);
+            channel.buckets_ptrs[correlate_row.zero].update_model_8bpc(channel.state, correlate_row.row[0], bpc);
+        }
+        stopidx = ++i + channel.state.waitcnt;
+    } else {
+        stopidx = i + channel.state.waitcnt;
+    }
+    for (;;) {
+        var rc = 0;
+        while (stopidx < end && !rc) {
+            var pbucket;
+            for (; i <= stopidx && !rc; i++) {
+                var pixel = i * rgb32_pixel_size;
+                var pixelm1 = (i-1) * rgb32_pixel_size;
+                var pixelm2 = (i-2) * rgb32_pixel_size;
+
+                if (prev_row[pixelm1+rgb32_pixel_pad] == prev_row[pixel+rgb32_pixel_pad])
+                {
+                    if (run_index != i && i > 2 && cur_row[pixelm1+rgb32_pixel_pad] == cur_row[pixelm2+rgb32_pixel_pad])
+                    {
+                        /* do run */
+                        channel.state.waitcnt = stopidx - i;
+                        run_index = i;
+
+                        run_end = i + this.decode_run(channel.state);
+
+                        for (; i < run_end; i++) {
+                            var pixel = i * rgb32_pixel_size;
+                            var pixelm1 = (i-1) * rgb32_pixel_size;
+                            cur_row[pixel+rgb32_pixel_pad] = cur_row[pixelm1+rgb32_pixel_pad];
+                        }
+
+                        if (i == end) {
+                            return;
+                        }
+                        else
+                        {
+                            stopidx = i + channel.state.waitcnt;
+                            rc = 1;
+                            break;
+                        }
+                    }
+                }
+
+                pbucket = channel.buckets_ptrs[correlate_row.row[i - 1]];
+                a = golomb_decoding_8bpc(pbucket.bestcode, this.io_word);
+                correlate_row.row[i] = a.rc
+                cur_row[pixel+rgb32_pixel_pad] = (family_8bpc.xlatL2U[a.rc] + ((cur_row[pixelm1+rgb32_pixel_pad] + prev_row[pixel+rgb32_pixel_pad]) >> 1)) & bpc_mask;
+                this.decode_eatbits(a.codewordlen);
+            }
+            if (rc)
+                break;
+
+            pbucket.update_model_8bpc(channel.state, correlate_row.row[stopidx], bpc);
+
+            stopidx = i + (channel.state.tabrand() & waitmask);
+        }
+
+        for (; i < end && !rc; i++) {
+            var pixel = i * rgb32_pixel_size;
+            var pixelm1 = (i-1) * rgb32_pixel_size;
+            var pixelm2 = (i-2) * rgb32_pixel_size;
+            if (prev_row[pixelm1+rgb32_pixel_pad] == prev_row[pixel+rgb32_pixel_pad])
+            {
+                if (run_index != i && i > 2 && cur_row[pixelm1+rgb32_pixel_pad] == cur_row[pixelm2+rgb32_pixel_pad])
+                {
+                    /* do run */
+                    channel.state.waitcnt = stopidx - i;
+                    run_index = i;
+
+                    run_end = i + this.decode_run(channel.state);
+
+                    for (; i < run_end; i++) {
+                        var pixel = i * rgb32_pixel_size;
+                        var pixelm1 = (i-1) * rgb32_pixel_size;
+                        cur_row[pixel+rgb32_pixel_pad] = cur_row[pixelm1+rgb32_pixel_pad];
+                    }
+
+                    if (i == end) {
+                        return;
+                    }
+                    else
+                    {
+                        stopidx = i + channel.state.waitcnt;
+                        rc = 1;
+                        break;
+                    }
+                }
+            }
+
+            a = golomb_decoding_8bpc(channel.buckets_ptrs[correlate_row.row[i-1]].bestcode, this.io_word);
+            correlate_row.row[i] = a.rc;
+            cur_row[pixel+rgb32_pixel_pad] = (family_8bpc.xlatL2U[a.rc] + ((cur_row[pixelm1+rgb32_pixel_pad] + prev_row[pixel+rgb32_pixel_pad]) >> 1)) & bpc_mask;
+            this.decode_eatbits(a.codewordlen);
+        }
+
+        if (!rc)
+        {
+            channel.state.waitcnt = stopidx - end;
+            return;
+        }
+    }
+}
+
+QuicEncoder.prototype.quic_four_uncompress_row = function(channel, prev_row,
+                                                        cur_row)
+{
+    var bpc = 8;
+    var bpc_mask = 0xff;
+    var correlate_row = channel.correlate_row;
+    var pos = 0;
+    var width = this.width;
+
+    while ((wmimax > channel.state.wmidx) && (channel.state.wmileft <= width)) {
+        if (channel.state.wmileft) {
+            this.quic_four_uncompress_row_seg(channel, correlate_row, prev_row, cur_row, pos,
+                                      pos + channel.state.wmileft, bpc, bpc_mask);
+            pos += channel.state.wmileft;
+            width -= channel.state.wmileft;
+        }
+
+        channel.state.wmidx++;
+        channel.state.set_wm_trigger();
+        channel.state.wmileft = wminext;
+    }
+
+    if (width) {
+        this.quic_four_uncompress_row_seg(channel, correlate_row, prev_row, cur_row, pos,
+                                  pos + width, bpc, bpc_mask);
+        if (wmimax > channel.state.wmidx) {
+            channel.state.wmileft -= width;
+        }
+    }
+}
+
 /* We need to be generating rgb32 or rgba */
 QuicEncoder.prototype.quic_decode = function(buf, stride)
 {
@@ -973,8 +1212,28 @@ QuicEncoder.prototype.quic_decode = function(buf, stride)
             return false;
             break;
         case QUIC_IMAGE_TYPE_RGBA:
-            console.log("quic: unsupported output format\n");
-            return false;
+            this.channels[0].correlate_row.zero = 0;
+            this.channels[1].correlate_row.zero = 0;
+            this.channels[2].correlate_row.zero = 0;
+            this.quic_rgb32_uncompress_row0(buf);
+
+            this.channels[3].correlate_row.zero = 0;
+            this.quic_four_uncompress_row0(this.channels[3], buf);
+
+            this.rows_completed++;
+            for (row = 1; row < this.height; row++) {
+                var prev = buf;
+                buf = prev.subarray(stride);
+
+                this.channels[0].correlate_row.zero = this.channels[0].correlate_row.row[0];
+                this.channels[1].correlate_row.zero = this.channels[1].correlate_row.row[0];
+                this.channels[2].correlate_row.zero = this.channels[2].correlate_row.row[0];
+                this.quic_rgb32_uncompress_row(prev, buf);
+
+                this.channels[3].correlate_row.zero = this.channels[3].correlate_row.row[0];
+                this.quic_four_uncompress_row(encoder.channels[3], prev, buf);
+                this.rows_completed++;
+            }
             break;
 
         case QUIC_IMAGE_TYPE_GRAY:
@@ -995,7 +1254,8 @@ QuicEncoder.prototype.simple_quic_decode = function(buf)
     var stride = 4; /* FIXME - proper stride calc please */
     if (!this.quic_decode_begin(buf))
         return undefined;
-    if (this.type != QUIC_IMAGE_TYPE_RGB32 && this.type != QUIC_IMAGE_TYPE_RGB24)
+    if (this.type != QUIC_IMAGE_TYPE_RGB32 && this.type != QUIC_IMAGE_TYPE_RGB24
+        && this.type != QUIC_IMAGE_TYPE_RGBA)
         return undefined;
     var out = new Uint8Array(this.width*this.height*4);
     out[0] = 69;
@@ -1041,7 +1301,7 @@ function convert_spice_quic_to_web(context, spice_quic)
         if (spice_quic.type !== QUIC_IMAGE_TYPE_RGBA)
             ret.data[i + 3] = 255;
         else
-            ret.data[i + 3] = spice_quic.outptr[i + 3];
+            ret.data[i + 3] = 255 - spice_quic.outptr[i + 3];
     }
    return ret;
 }
