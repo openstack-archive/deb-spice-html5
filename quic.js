@@ -1,3 +1,5 @@
+/*"use strict";*/
+/* use strict is commented out because it results in a 5x slowdone in chrome */
 /*
  *    Copyright (C) 2012 by Jeremy P. White <jwhite@codeweavers.com>
  *    Copyright (C) 2012 by Aric Stewart <aric@codeweavers.com>
@@ -188,7 +190,6 @@ function family_init(family, bpc, limit)
 
 function quic_image_bpc(type)
 {
-    var bpc;
     switch (type) {
     case QUIC_IMAGE_TYPE_GRAY:
         return 8;
@@ -224,20 +225,17 @@ function golomb_decoding_8bpc(l, bits)
 {
     var rc;
     var cwlen;
-    var usBits = bits;
 
     if (bits < 0 || bits > family_8bpc.notGRprefixmask[l])
     {
         var zeroprefix = cnt_l_zeroes(bits);
         cwlen = zeroprefix + 1 + l;
-        var cwm = 32 - cwlen;
-        rc = (zeroprefix << l) | (bits >> cwm) & bppmask[l];
+        rc = (zeroprefix << l) | (bits >> (32-cwlen)) & bppmask[l];
     }
     else
     {
         cwlen = family_8bpc.notGRcwlen[l];
-        var cwm = 32 - cwlen;
-        rc = family_8bpc.nGRcodewords[l] + ((bits >> cwm) & bppmask[family_8bpc.notGRsuffixlen[l]]);
+        rc = family_8bpc.nGRcodewords[l] + ((bits >> (32-cwlen)) & bppmask[family_8bpc.notGRsuffixlen[l]]);
     }
     return {'codewordlen':cwlen, 'rc':rc};
 }
@@ -253,44 +251,42 @@ function golomb_code_len_8bpc(n, l)
 
 function QuicModel(bpc)
 {
-    var bsize;
     var bstart;
     var bend = 0;
-    var repcntr;
 
     this.levels = 0x1 << bpc;
     this.n_buckets_ptrs = 0;
 
     switch (evol) {
-    case 1:
-        this.repfirst = 3;
-        this.firstsize = 1;
-        this.repnext = 2;
-        this.mulsize = 2;
-        break;
-    case 3:
-        this.repfirst = 1;
-        this.firstsize = 1;
-        this.repnext = 1;
-        this.mulsize = 2;
-        break;
-    case 5:
-        this.repfirst = 1;
-        this.firstsize = 1;
-        this.repnext = 1;
-        this.mulsize = 4;
-        break;
-    case 0:
-    case 2:
-    case 4:
-        console.log("quic: findmodelparams(): evol value obsolete!!!\n");
-    default:
-        console.log("quic: findmodelparams(): evol out of range!!!\n");
+        case 1:
+            this.repfirst = 3;
+            this.firstsize = 1;
+            this.repnext = 2;
+            this.mulsize = 2;
+            break;
+        case 3:
+            this.repfirst = 1;
+            this.firstsize = 1;
+            this.repnext = 1;
+            this.mulsize = 2;
+            break;
+        case 5:
+            this.repfirst = 1;
+            this.firstsize = 1;
+            this.repnext = 1;
+            this.mulsize = 4;
+            break;
+        case 0:
+        case 2:
+        case 4:
+            console.log("quic: findmodelparams(): evol value obsolete!!!\n");
+        default:
+            console.log("quic: findmodelparams(): evol out of range!!!\n");
     }
 
     this.n_buckets = 0;
-    repcntr = this.repfirst + 1;
-    bsize = this.firstsize;
+    var repcntr = this.repfirst + 1;
+    var bsize = this.firstsize;
 
     do {
         if (this.n_buckets) {
@@ -311,7 +307,6 @@ function QuicModel(bpc)
 
         if (!this.n_buckets_ptrs) {
             this.n_buckets_ptrs = this.levels;
-
         }
 
         (this.n_buckets)++;
@@ -345,11 +340,9 @@ QuicBucket.prototype = {
     update_model_8bpc : function (state, curval, bpp)
     {
         var i;
-        var bestcode;
-        var bestcodelen;
 
-        bestcode = bpp - 1;
-        bestcodelen = (this.counters[bestcode] += golomb_code_len_8bpc(curval, bestcode));
+        var bestcode = bpp - 1;
+        var bestcodelen = (this.counters[bestcode] += golomb_code_len_8bpc(curval, bestcode));
 
         for (i = bpp - 2; i >= 0; i--) {
             var ithcodelen = (this.counters[i] += golomb_code_len_8bpc(curval, i));
@@ -380,12 +373,12 @@ QuicFamilyStat.prototype = {
 
     fill_model_structures : function(model)
     {
-        var bsize, bstart, repcntr;
+        var bstart;
         var bend = 0;
         var bnumber = 0;
 
-        repcntr = model.repfirst + 1;
-        bsize = model.firstsize;
+        var repcntr = model.repfirst + 1;
+        var bsize = model.firstsize;
 
         do {
             if (bnumber) {
@@ -438,15 +431,14 @@ QuicChannel.prototype = {
 
     reste : function (bpc)
     {
+        var j;
         this.correlate_row = { zero: 0 , row: []};
 
         if (bpc == 8) {
-            var j;
             for (j = 0; j < this.model_8bpc.n_buckets; j++)
                 this.family_stat_8bpc.buckets_buf[j].reste(7);
             this.buckets_ptrs = this.family_stat_8bpc.buckets_ptrs;
         } else if (bpc == 5) {
-            var j;
             for (j = 0; j < this.model_5bpc.n_buckets; j++)
                 this.family_stat_8bpc.buckets_buf[j].reste(4);
             this.buckets_ptrs = this.family_stat_5bpc.buckets_ptrs;
@@ -639,10 +631,9 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
     var stopidx;
     var n_channels = 3;
     var c;
+    var a;
 
     if (!i) {
-        var a;
-
         cur_row[rgb32_pixel_pad] = 0;
         c = 0;
         do
@@ -670,8 +661,6 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
 
     while (stopidx < end) {
         for (; i <= stopidx; i++) {
-            var a;
-
             cur_row[(i* rgb32_pixel_size)+rgb32_pixel_pad] = 0;
             c = 0;
             do
@@ -691,8 +680,6 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row0_seg = function (i, cur_row, end
     }
 
     for (; i < end; i++) {
-        var a;
-
         cur_row[(i* rgb32_pixel_size)+rgb32_pixel_pad] = 0;
         c = 0;
         do
@@ -911,14 +898,12 @@ QuicEncoder.prototype.decode_run = function()
             break;
         }
         this.decode_eatbits(8);
-    } while (1);
-
+    } while (true);
 
     if (this.rgb_state.melclen) {
         runlen += this.io_word >>> (32 - this.rgb_state.melclen);
         this.decode_eatbits(this.rgb_state.melclen);
     }
-
 
     if (this.rgb_state.melcstate) {
         this.rgb_state.melclen = J[--this.rgb_state.melcstate];
@@ -961,8 +946,6 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row = function (prev_row, cur_row)
 QuicEncoder.prototype.quic_decode = function(buf, stride)
 {
     var row;
-    var prev;
-    var cur = buf;
 
     switch (this.type)
     {
@@ -971,17 +954,17 @@ QuicEncoder.prototype.quic_decode = function(buf, stride)
             this.channels[0].correlate_row.zero = 0;
             this.channels[1].correlate_row.zero = 0;
             this.channels[2].correlate_row.zero = 0;
-            this.quic_rgb32_uncompress_row0(cur);
+            this.quic_rgb32_uncompress_row0(buf);
 
             this.rows_completed++;
             for (row = 1; row < this.height; row++)
             {
-                prev = cur;
-                cur = prev.subarray(stride);
+                var prev = buf;
+                buf = prev.subarray(stride);
                 this.channels[0].correlate_row.zero = this.channels[0].correlate_row.row[0];
                 this.channels[1].correlate_row.zero = this.channels[1].correlate_row.row[0];
                 this.channels[2].correlate_row.zero = this.channels[2].correlate_row.row[0];
-                this.quic_rgb32_uncompress_row(prev, cur);
+                this.quic_rgb32_uncompress_row(prev, buf);
                 this.rows_completed++;
             };
             break;
