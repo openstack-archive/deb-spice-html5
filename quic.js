@@ -775,7 +775,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
                         /* do run */
                         this.rgb_state.waitcnt = stopidx - i;
                         run_index = i;
-                        run_end = i + this.decode_run();
+                        run_end = i + this.decode_run(this.rgb_state);
 
                         for (; i < run_end; i++) {
                             var pixel = i * rgb32_pixel_size;
@@ -833,7 +833,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
                     /* do run */
                     this.rgb_state.waitcnt = stopidx - i;
                     run_index = i;
-                    run_end = i + this.decode_run();
+                    run_end = i + this.decode_run(this.rgb_state);
 
                     for (; i < run_end; i++) {
                         var pixel = i * rgb32_pixel_size;
@@ -875,7 +875,7 @@ QuicEncoder.prototype.quic_rgb32_uncompress_row_seg = function( prev_row, cur_ro
         }
 }
 
-QuicEncoder.prototype.decode_run = function()
+QuicEncoder.prototype.decode_run = function(state)
 {
     var runlen = 0;
 
@@ -885,11 +885,11 @@ QuicEncoder.prototype.decode_run = function()
         var temp = zeroLUT[x];
 
         for (hits = 1; hits <= temp; hits++) {
-            runlen += this.rgb_state.melcorder;
+            runlen += state.melcorder;
 
-            if (this.rgb_state.melcstate < 32) {
-                this.rgb_state.melclen = J[++this.rgb_state.melcstate];
-                this.rgb_state.melcorder = (1 << this.rgb_state.melclen);
+            if (state.melcstate < 32) {
+                state.melclen = J[++state.melcstate];
+                state.melcorder = (1 << state.melclen);
             }
         }
         if (temp != 8) {
@@ -900,14 +900,14 @@ QuicEncoder.prototype.decode_run = function()
         this.decode_eatbits(8);
     } while (true);
 
-    if (this.rgb_state.melclen) {
-        runlen += this.io_word >>> (32 - this.rgb_state.melclen);
-        this.decode_eatbits(this.rgb_state.melclen);
+    if (state.melclen) {
+        runlen += this.io_word >>> (32 - state.melclen);
+        this.decode_eatbits(state.melclen);
     }
 
-    if (this.rgb_state.melcstate) {
-        this.rgb_state.melclen = J[--this.rgb_state.melcstate];
-        this.rgb_state.melcorder = (1 << this.rgb_state.melclen);
+    if (state.melcstate) {
+        state.melclen = J[--state.melcstate];
+        state.melcorder = (1 << state.melclen);
     }
 
     return runlen;
