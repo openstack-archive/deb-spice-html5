@@ -86,7 +86,7 @@ function handle_mousemove(e)
         move = new SpiceMsgcMouseMotion(this.sc, e)
         msg.build_msg(SPICE_MSGC_INPUTS_MOUSE_MOTION, move);
     }
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
     {
         if (this.sc.inputs.waiting_for_ack < (2 * SPICE_INPUT_MOTION_ACK_BUNCH))
         {
@@ -105,7 +105,7 @@ function handle_mousedown(e)
     var press = new SpiceMsgcMousePress(this.sc, e)
     var msg = new SpiceMiniData();
     msg.build_msg(SPICE_MSGC_INPUTS_MOUSE_PRESS, press);
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
         this.sc.inputs.send_msg(msg);
 
     e.preventDefault();
@@ -122,7 +122,7 @@ function handle_mouseup(e)
     var release = new SpiceMsgcMouseRelease(this.sc, e)
     var msg = new SpiceMiniData();
     msg.build_msg(SPICE_MSGC_INPUTS_MOUSE_RELEASE, release);
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
         this.sc.inputs.send_msg(msg);
 
     e.preventDefault();
@@ -141,11 +141,11 @@ function handle_mousewheel(e)
 
     var msg = new SpiceMiniData();
     msg.build_msg(SPICE_MSGC_INPUTS_MOUSE_PRESS, press);
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
         this.sc.inputs.send_msg(msg);
 
     msg.build_msg(SPICE_MSGC_INPUTS_MOUSE_RELEASE, release);
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
         this.sc.inputs.send_msg(msg);
 
     e.preventDefault();
@@ -157,7 +157,7 @@ function handle_keydown(e)
     var msg = new SpiceMiniData();
     check_and_update_modifiers(e, key.code, this.sc);
     msg.build_msg(SPICE_MSGC_INPUTS_KEY_DOWN, key);
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
         this.sc.inputs.send_msg(msg);
 
     e.preventDefault();
@@ -169,7 +169,7 @@ function handle_keyup(e)
     var msg = new SpiceMiniData();
     check_and_update_modifiers(e, key.code, this.sc);
     msg.build_msg(SPICE_MSGC_INPUTS_KEY_UP, key);
-    if (this.sc && this.sc.inputs)
+    if (this.sc && this.sc.inputs && this.sc.inputs.state === "ready")
         this.sc.inputs.send_msg(msg);
 
     e.preventDefault();
@@ -221,7 +221,7 @@ function check_and_update_modifiers(e, code, sc)
     else if (code === (0x80|0xE0B5))
         Meta_state = false;
 
-    if (sc && sc.inputs)
+    if (sc && sc.inputs && sc.inputs.state === "ready")
     {
         if (Shift_state != e.shiftKey)
         {
