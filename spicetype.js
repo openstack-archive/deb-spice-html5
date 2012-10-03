@@ -234,6 +234,37 @@ SpiceImage.prototype =
             at += this.jpeg.data.byteLength;
         }
 
+        if (this.descriptor.type == SPICE_IMAGE_TYPE_JPEG_ALPHA)
+        {
+            this.jpeg_alpha = new Object;
+            this.jpeg_alpha.flags = dv.getUint8(at, true); at += 1;
+            this.jpeg_alpha.jpeg_size = dv.getUint32(at, true); at += 4;
+            this.jpeg_alpha.data_size = dv.getUint32(at, true); at += 4;
+            this.jpeg_alpha.data = mb.slice(at, this.jpeg_alpha.jpeg_size + at);
+            at += this.jpeg_alpha.data.byteLength;
+            // Alpha channel is an LZ image
+            this.jpeg_alpha.alpha = new Object();
+            this.jpeg_alpha.alpha.length = this.jpeg_alpha.data_size - this.jpeg_alpha.jpeg_size;
+            var initial_at = at;
+            this.jpeg_alpha.alpha.magic = "";
+            for (var i = 3; i >= 0; i--)
+                this.jpeg_alpha.alpha.magic += String.fromCharCode(dv.getUint8(at + i));
+            at += 4;
+
+            // NOTE:  The endian change is *correct*
+            this.jpeg_alpha.alpha.version = dv.getUint32(at); at += 4;
+            this.jpeg_alpha.alpha.type = dv.getUint32(at); at += 4;
+            this.jpeg_alpha.alpha.width = dv.getUint32(at); at += 4;
+            this.jpeg_alpha.alpha.height = dv.getUint32(at); at += 4;
+            this.jpeg_alpha.alpha.stride = dv.getUint32(at); at += 4;
+            this.jpeg_alpha.alpha.top_down = dv.getUint32(at); at += 4;
+
+            var header_size = at - initial_at;
+
+            this.jpeg_alpha.alpha.data   = mb.slice(at, this.jpeg_alpha.alpha.length + at - header_size);
+            at += this.jpeg_alpha.alpha.data.byteLength;
+        }
+
         if (this.descriptor.type == SPICE_IMAGE_TYPE_QUIC)
         {
             this.quic = new SpiceQuic;

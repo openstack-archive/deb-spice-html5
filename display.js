@@ -207,6 +207,47 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
 
                 return true;
             }
+            else if (draw_copy.data.src_bitmap.descriptor.type == SPICE_IMAGE_TYPE_JPEG_ALPHA)
+            {
+                if (! draw_copy.data.src_bitmap.jpeg_alpha)
+                {
+                    this.log_warn("FIXME: DrawCopy could not handle this JPEG ALPHA file.");
+                    return false;
+                }
+
+                // FIXME - how lame is this.  Be have it in binary format, and we have
+                //         to put it into string to get it back into jpeg.  Blech.
+                var tmpstr = "data:image/jpeg,";
+                var img = new Image;
+                var i;
+                var qdv = new Uint8Array(draw_copy.data.src_bitmap.jpeg_alpha.data);
+                for (i = 0; i < qdv.length; i++)
+                {
+                    tmpstr +=  '%';
+                    if (qdv[i] < 16)
+                        tmpstr += '0';
+                    tmpstr += qdv[i].toString(16);
+                }
+
+                img.o = 
+                    { base: draw_copy.base,
+                      tag: "jpeg." + draw_copy.data.src_bitmap.surface_id,
+                      descriptor : draw_copy.data.src_bitmap.descriptor,
+                      sc : this,
+                    };
+
+                if (this.surfaces[draw_copy.base.surface_id].format == SPICE_SURFACE_FMT_32_ARGB)
+                {
+
+                    var canvas = this.surfaces[draw_copy.base.surface_id].canvas;
+                    img.alpha_img = convert_spice_lz_to_web(canvas.context,
+                                            draw_copy.data.src_bitmap.jpeg_alpha.alpha);
+                }
+                img.onload = handle_draw_jpeg_onload;
+                img.src = tmpstr;
+
+                return true;
+            }
             else if (draw_copy.data.src_bitmap.descriptor.type == SPICE_IMAGE_TYPE_BITMAP)
             {
                 var canvas = this.surfaces[draw_copy.base.surface_id].canvas;
@@ -707,18 +748,45 @@ function handle_draw_jpeg_onload()
     else
         context = this.o.sc.surfaces[this.o.base.surface_id].canvas.context;
 
-    context.drawImage(this, this.o.base.box.left, this.o.base.box.top);
-
-    if (this.o.descriptor && 
-        (this.o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
+    if (this.alpha_img)
     {
-        if (! ("cache" in this.o.sc))
-            this.o.sc.cache = [];
+        var c = document.createElement("canvas");
+        var t = c.getContext("2d");
+        c.setAttribute('width', this.alpha_img.width);
+        c.setAttribute('height', this.alpha_img.height);
+        t.putImageData(this.alpha_img, 0, 0);
+        t.globalCompositeOperation = 'source-in';
+        t.drawImage(this, 0, 0);
+     
+        context.drawImage(c, this.o.base.box.left, this.o.base.box.top);
 
-        this.o.sc.cache[this.o.descriptor.id] = 
-            context.getImageData(this.o.base.box.left, this.o.base.box.top,
-                this.o.base.box.right - this.o.base.box.left,
-                this.o.base.box.bottom - this.o.base.box.top);
+        if (this.o.descriptor && 
+            (this.o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
+        {
+            if (! ("cache" in this.o.sc))
+                this.o.sc.cache = [];
+
+            this.o.sc.cache[this.o.descriptor.id] = 
+                t.getImageData(0, 0,
+                    this.alpha_img.width,
+                    this.alpha_img.height);
+        }
+    }
+    else
+    {
+        context.drawImage(this, this.o.base.box.left, this.o.base.box.top);
+
+        if (this.o.descriptor && 
+            (this.o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
+        {
+            if (! ("cache" in this.o.sc))
+                this.o.sc.cache = [];
+
+            this.o.sc.cache[this.o.descriptor.id] = 
+                context.getImageData(this.o.base.box.left, this.o.base.box.top,
+                    this.o.base.box.right - this.o.base.box.left,
+                    this.o.base.box.bottom - this.o.base.box.top);
+        }
     }
 
     if (temp_canvas == null)
