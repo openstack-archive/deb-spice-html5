@@ -141,18 +141,26 @@ function lz_rgb32_decompress(in_buf, at, out_buf, type, default_alpha)
     return encoder - 1;
 }
 
-function convert_spice_lz_rgb_to_web(context, lz_rgb)
+function convert_spice_lz_to_web(context, lz_image)
 {
-    var u8 = new Uint8Array(lz_rgb.data);
     var at;
-    if (lz_rgb.type != LZ_IMAGE_TYPE_RGB32 && lz_rgb.type != LZ_IMAGE_TYPE_RGBA)
+    if (lz_image.type === LZ_IMAGE_TYPE_RGB32 || lz_image.type === LZ_IMAGE_TYPE_RGBA)
+    {
+        var u8 = new Uint8Array(lz_image.data);
+        var ret = context.createImageData(lz_image.width, lz_image.height);
+
+        at = lz_rgb32_decompress(u8, 0, ret.data, LZ_IMAGE_TYPE_RGB32, lz_image.type != LZ_IMAGE_TYPE_RGBA);
+        if (lz_image.type == LZ_IMAGE_TYPE_RGBA)
+            lz_rgb32_decompress(u8, at, ret.data, LZ_IMAGE_TYPE_RGBA, false);
+    }
+    else if (lz_image.type === LZ_IMAGE_TYPE_XXXA)
+    {
+        var u8 = new Uint8Array(lz_image.data);
+        var ret = context.createImageData(lz_image.width, lz_image.height);
+        lz_rgb32_decompress(u8, 0, ret.data, LZ_IMAGE_TYPE_RGBA, false);
+    }
+    else
         return undefined;
-
-    var ret = context.createImageData(lz_rgb.width, lz_rgb.height);
-
-    at = lz_rgb32_decompress(u8, 0, ret.data, LZ_IMAGE_TYPE_RGB32, lz_rgb.type != LZ_IMAGE_TYPE_RGBA);
-    if (lz_rgb.type == LZ_IMAGE_TYPE_RGBA)
-        lz_rgb32_decompress(u8, at, ret.data, LZ_IMAGE_TYPE_RGBA, false);
 
     return ret;
 }
