@@ -66,5 +66,5 @@ local: tar rpm
 git: gittar rpm
 
 install:
-	install -D apache.conf $(sysconfdir)/httpd/conf.d/spice-html5.conf
+	install --mode=644 -D apache.conf $(sysconfdir)/httpd/conf.d/spice-html5.conf
 	find . \( -iname '*.html' -or -iname '*.js' -or -iname '*.css' \) -exec install --mode=644 -D {} $(datadir)/spice-html5/{} \;
