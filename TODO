@@ -1,22 +1,3 @@
-Bugs:
-
-  . In my latest Xorg/fluxbox theme test, I get flickering of title
-    windows, notably when you start up gimp.  That seems new.
-
-  . In Chrome, I've gotten it to get the parsing out of sync.
-    Not clear why or how to reproduce.  I've added a javascript
-    alert to hopefully make finding it more possible.
-    A test case is really needed for it...
-
-  . Drawing with Gimp is slow (lack of stream support?)
-
-  . If using xspice, you can get two bugs; a complete stall
-    (until you do something on the X server), or losing the mouse.
-    Both are probably related to that the watch_add/watch_update_mask functionality
-    in the qxl driver doesn't work.  A patch for that has been submitted
-    to spice-devel ('Actually process write watches in the wakeup handler').
-
-
 Medium Tasks:
 
   . Get the mouse event code out of spicemsg (and make spicemsg
@@ -37,9 +18,8 @@ Medium Tasks:
       - Other idea 1: queue them and only send when idle, but collapse first?
       - Other idea 2: Time limit motion events
 
-  . The whole key code to scan code thing is awful and should be
-    taken out and shot...or revamped
-
+  . Shift from the simplistic Makefile to an autoconf based Makefile
+    so we can try to support 'make install' on other systems.
 
 Big Tasks:
 
