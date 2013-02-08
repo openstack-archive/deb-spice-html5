@@ -1,0 +1,38 @@
+Name:           spice-html5
+Version:        VERSION
+Release:        1%{?dist}
+Summary:        Pure Javascript SPICE client
+
+License:        GPLv3
+URL:            http://www.spice-space.org
+Source0:        http://www.spice-space.org/download/spice-html5/spice-html5-VERSION.tar.gz
+
+BuildArch:      noarch
+Packager:       Jeremy White <jwhite@codeweavers.com>
+
+%description
+spice-html5 is a Javascript SPICE client.  This includes a simple html
+page to enable a login, and the client itself.  It includes a configuration
+file for Apache, but should work with any web server.
+
+%prep
+%setup -q
+
+
+%build
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%make_install
+
+
+%files
+%defattr(-,root,root)
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf
+%{_datadir}/spice-html5
+%doc COPYING README TODO
+
+
+%changelog
+* Fri Feb 8 2013 Jeremy White <jwhite@codeweavers.com> 0.1.0-1
+- Initial version for packaging.
