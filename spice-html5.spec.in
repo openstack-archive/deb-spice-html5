@@ -3,7 +3,7 @@ Version:        VERSION
 Release:        1%{?dist}
 Summary:        Pure Javascript SPICE client
 
-License:        GPLv3
+License:        LGPLv3
 URL:            http://www.spice-space.org
 Source0:        http://www.spice-space.org/download/spice-html5/spice-html5-VERSION.tar.gz
 
@@ -29,9 +29,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf
 %{_datadir}/spice-html5
-%doc COPYING README TODO
+%doc COPYING COPYING.LESSER README TODO
 
 
 %changelog
+* Wed Feb 13 2013 Jeremy White <jwhite@codeweavers.com> 0.1.1-1
+- Correct the license to LGPL
+- Revise the Apache configuration file to allow access more broadly
+
 * Fri Feb 8 2013 Jeremy White <jwhite@codeweavers.com> 0.1.0-1
 - Initial version for packaging.
