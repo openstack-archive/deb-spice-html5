@@ -18,7 +18,6 @@
 
 DESTDIR := $(if $(DESTDIR),$(DESTDIR),/)
 datadir := $(if $(datadir),$(datadir),$(DESTDIR)/usr/share)
-sysconfdir := $(if $(sysconfdir),$(sysconfdir),$(DESTDIR)/etc)
 tag := $(if $(tag),$(tag),HEAD)
 
 ifndef version
@@ -66,5 +65,4 @@ local: tar rpm
 git: gittar rpm
 
 install:
-	install --mode=644 -D apache.conf $(sysconfdir)/httpd/conf.d/spice-html5.conf
 	find . \( -iname '*.html' -or -iname '*.js' -or -iname '*.css' \) -exec install --mode=644 -D {} $(datadir)/spice-html5/{} \;

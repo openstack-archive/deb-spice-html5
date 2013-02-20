@@ -25,14 +25,14 @@ file for Apache, but should work with any web server.
 
 
 %files
-%config(noreplace) %{_sysconfdir}/httpd/conf.d/*.conf
 %{_datadir}/%{name}
-%doc COPYING COPYING.LESSER README TODO
+%doc COPYING COPYING.LESSER README TODO apache.conf.sample
 
 
 %changelog
 * Wed Feb 20 2013 Jeremy White <jwhite@codeweavers.com> 0.1.2-1
 - Revise the .spec file to use %{name}, and remove a few unneded statements
+- No longer install apache.conf, just put a sample under doc/
 
 * Wed Feb 13 2013 Jeremy White <jwhite@codeweavers.com> 0.1.1-1
 - Correct the license to LGPL
