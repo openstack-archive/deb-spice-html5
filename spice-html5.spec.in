@@ -5,7 +5,7 @@ Summary:        Pure Javascript SPICE client
 
 License:        LGPLv3
 URL:            http://www.spice-space.org
-Source0:        http://www.spice-space.org/download/%{name}/%{name}-%{version}.tar.gz
+Source0:        http://people.freedesktop.org/~jwhite/%{name}/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 
@@ -30,9 +30,10 @@ file for Apache, but should work with any web server.
 
 
 %changelog
-* Wed Feb 20 2013 Jeremy White <jwhite@codeweavers.com> 0.1.2-1
+* Mon Feb 25 2013 Jeremy White <jwhite@codeweavers.com> 0.1.2-1
 - Revise the .spec file to use %{name}, and remove a few unneded statements
 - No longer install apache.conf, just put a sample under doc/
+- Switch to an alternate download location, more easily updated
 
 * Wed Feb 13 2013 Jeremy White <jwhite@codeweavers.com> 0.1.1-1
 - Correct the license to LGPL
