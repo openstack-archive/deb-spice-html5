@@ -1,6 +1,6 @@
 Name:           spice-html5
 Version:        VERSION
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Pure Javascript SPICE client
 
 License:        LGPLv3
@@ -30,7 +30,7 @@ file for Apache, but should work with any web server.
 
 
 %changelog
-* Mon Feb 25 2013 Jeremy White <jwhite@codeweavers.com> 0.1.2-1
+* Mon Feb 25 2013 Jeremy White <jwhite@codeweavers.com> 0.1.2-2
 - Revise the .spec file to use %%{name}, and remove a few uneeded statements
 - No longer install apache.conf, just put a sample under doc/
 - Switch to an alternate download location, more easily updated
