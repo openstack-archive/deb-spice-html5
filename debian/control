@@ -6,7 +6,8 @@ Uploaders: Loic Dachary (OuoU) <loic@debian.org>,
            Julien Danjou <acid@debian.org>,
            Thomas Goirand <zigo@debian.org>,
            Ghe Rivero <ghe.rivero@stackops.com>,
-           Mehdi Abaakouk <sileht@sileht.net>
+           Mehdi Abaakouk <sileht@sileht.net>,
+           Liang Guo <guoliang@debian.org>
 Build-Depends: debhelper (>= 9), openstack-pkg-tools
 Standards-Version: 3.9.4
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/spice-html5.git;a=summary
