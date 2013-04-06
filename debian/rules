@@ -8,3 +8,9 @@ UPSTREAM_GIT = git://anongit.freedesktop.org/spice/spice-html5
 
 %:
 	dh $@
+
+override_dh_auto_install:
+	echo "Not using Makefile"
+
+override_dh_auto_build:
+	echo "Nothing to build"
