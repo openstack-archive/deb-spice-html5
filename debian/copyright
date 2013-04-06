@@ -4,7 +4,7 @@ Source: git://anongit.freedesktop.org/spice/spice-html5
 
 Files: thirdparty/jsbn.js thirdparty/prng4.js thirdparty/rng.js thirdparty/rsa.js
 Copyright: (c) 2003-2005, Tom Wu, All Rights Reserved
-Liense: MIT-with-addition
+License: MIT-with-addition
 
 Files: thirdparty/sha1.js
 Copyright: (c) 2000-2009, Paul Johnston & Contributors
