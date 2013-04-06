@@ -14,7 +14,7 @@ Files: atKeynames.js
 Copyright: (c) 2012, Aric Stewart <aric@codeweavers.com>
 	(c) 1990-91, Thomas Roell, Dinkelscherben, Germany.
 	(c) 1994-2003, The XFree86 Project, Inc.
-License: LGPL-3, multiple
+License: multiple-license
 
 Files: *
 Copyright: (c) 2012, Jeremy P. White <jwhite@codeweavers.com>
@@ -38,8 +38,26 @@ License: LGPL-3
  On Debian systems, the full text of the GNU Lesser General Public License is
  available from: /usr/share/common-licenses/LGPL-3.
 
-License: multiple
- MIT:
+License: multiple-license
+ LGPL-3:
+ .
+ spice-html5 is free software: you can redistribute it and/or modify it under
+ the terms of the GNU Lesser General Public License as published by the Free
+ Software Foundation, either version 3 of the License, or (at your option) any
+ later version.
+ .
+ spice-html5 is distributed in the hope that it will be useful, but WITHOUT ANY
+ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+ details.
+ .
+ You should have received a copy of the GNU Lesser General Public License along
+ with spice-html5.  If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the full text of the GNU Lesser General Public License is
+ available from: /usr/share/common-licenses/LGPL-3.
+ .
+ MIT-like:
  .
  Permission to use, copy, modify, distribute, and sell this software and its
  documentation for any purpose is hereby granted without fee, provided that the
