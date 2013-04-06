@@ -1,0 +1,30 @@
+Source: spice-html5
+Section: web
+Priority: extra
+Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
+Uploaders: Loic Dachary (OuoU) <loic@debian.org>,
+           Julien Danjou <acid@debian.org>,
+           Thomas Goirand <zigo@debian.org>,
+           Ghe Rivero <ghe.rivero@stackops.com>,
+           Mehdi Abaakouk <sileht@sileht.net>
+Build-Depends: debhelper (>= 9), openstack-pkg-tools
+Standards-Version: 3.9.4
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=openstack/spice-html5.git;a=summary
+Vcs-Git: git://anonscm.debian.org/openstack/spice-html5.git
+Homepage: http://www.spice-space.org/page/Html5
+
+Package: spice-html5
+Architecture: all
+Pre-Depends: dpkg (>= 1.15.6~)
+Recommends: websockify
+Depends: ${misc:Depends}
+Description: Spice Web client which runs entirely within a modern browser
+ Spice Web client which runs entirely within a modern browser. It is limited 
+ in function, a bit slow, and lacks support for many features of Spice       
+ (audio, video, agents just to name a few). 
+ .
+ The Simple Protocol for Independent Computing Environments (SPICE) is 
+ a remote display system built for virtual environments which allows 
+ you to view a computing 'desktop' environment not only on the machine 
+ where it is running, but from anywhere on the Internet and from a wide 
+ variety of machine architectures.

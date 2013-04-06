@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+
+# export DH_VERBOSE=1
+
+include /usr/share/openstack-pkg-tools/pkgos.make
+
+UPSTREAM_GIT = git://anongit.freedesktop.org/spice/spice-html5
+
+%:
+	dh $@

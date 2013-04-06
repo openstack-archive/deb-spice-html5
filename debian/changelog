@@ -1,0 +1,5 @@
+spice-html5 (0~0+20130318+ec9ae0cbd6-1) experimental; urgency=low
+
+  * Initial release. (Closes: #704810).
+
+ -- Thomas Goirand <zigo@debian.org>  Sat, 06 Apr 2013 14:58:23 +0800
