@@ -721,6 +721,8 @@ function handle_mouseover(e)
 
 function handle_mouseout(e)
 {
+    if (this.sc && this.sc.cursor && this.sc.cursor.spice_simulated_cursor)
+        this.sc.cursor.spice_simulated_cursor.style.display = 'none';
     this.blur();
 }
 
