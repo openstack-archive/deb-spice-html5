@@ -1,3 +1,9 @@
+spice-html5 (0~0+20130318+ec9ae0cbd6-2) unstable; urgency=low
+
+  * Uploading to unstable.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 13 May 2013 08:11:57 +0000
+
 spice-html5 (0~0+20130318+ec9ae0cbd6-1) experimental; urgency=low
 
   * Initial release. (Closes: #704810).
