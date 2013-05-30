@@ -20,12 +20,12 @@ Pre-Depends: dpkg (>= 1.15.6~)
 Recommends: websockify
 Depends: ${misc:Depends}
 Description: Spice Web client which runs entirely within a modern browser
- Spice Web client which runs entirely within a modern browser. It is limited 
- in function, a bit slow, and lacks support for many features of Spice       
- (audio, video, agents just to name a few). 
+ Spice Web client which runs entirely within a modern browser. It is limited
+ in function, a bit slow, and lacks support for many features of Spice
+ (audio, video, agents just to name a few).
  .
- The Simple Protocol for Independent Computing Environments (SPICE) is 
- a remote display system built for virtual environments which allows 
- you to view a computing 'desktop' environment not only on the machine 
- where it is running, but from anywhere on the Internet and from a wide 
+ The Simple Protocol for Independent Computing Environments (SPICE) is
+ a remote display system built for virtual environments which allows
+ you to view a computing 'desktop' environment not only on the machine
+ where it is running, but from anywhere on the Internet and from a wide
  variety of machine architectures.

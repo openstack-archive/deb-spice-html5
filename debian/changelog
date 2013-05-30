@@ -1,6 +1,7 @@
 spice-html5 (0~0+20130318+ec9ae0cbd6-3) unstable; urgency=low
 
   * Added patch for the minus char mapping (on the alpha keyboard).
+  * Removed trailing spaces in debian/control long desc.
 
  -- Thomas Goirand <zigo@debian.org>  Sat, 25 May 2013 13:33:42 +0000
 
