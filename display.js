@@ -778,6 +778,10 @@ function handle_draw_jpeg_onload()
     {
         context.drawImage(this, this.o.base.box.left, this.o.base.box.top);
 
+        // Give the Garbage collector a clue to recycle this; avoids
+        //  fairly massive memory leaks during video playback
+        this.src = null;
+
         if (this.o.descriptor && 
             (this.o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
         {
