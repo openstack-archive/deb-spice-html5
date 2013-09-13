@@ -445,8 +445,7 @@ SpiceMsgcDisplayInit.prototype =
         at = at || 0;
         var dv = new SpiceDataView(a);
         dv.setUint8(at, this.pixmap_cache_id, true); at++;
-        dv.setUint32(at, 0, true); at += 4;
-        dv.setUint32(at, this.pixmap_cache_size, true); at += 4;
+        dv.setUint64(at, this.pixmap_cache_size, true); at += 8;
         dv.setUint8(at, this.glz_dictionary_id, true); at++;
         dv.setUint32(at, this.glz_dictionary_window_size, true); at += 4;
     },
