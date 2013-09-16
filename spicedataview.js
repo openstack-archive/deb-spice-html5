@@ -66,6 +66,18 @@ SpiceDataView.prototype = {
         return (this.getUint16(byteOffset + high, littleEndian) << 16) | 
                 this.getUint16(byteOffset + low, littleEndian);
     },
+    getUint64: function (byteOffset, littleEndian)
+    {
+        var low = 4, high = 0;
+        if (littleEndian)
+        {
+            low = 0;
+            high = 4;
+        }
+
+        return (this.getUint32(byteOffset + high, littleEndian) << 32) |
+                this.getUint32(byteOffset + low, littleEndian);
+    },
     setUint8:  function(byteOffset, b)
     {
         this.u8[byteOffset] = (b & 0xff);

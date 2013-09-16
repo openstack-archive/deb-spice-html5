@@ -414,9 +414,7 @@ SpiceMsgNotify.prototype =
         at = at || 0;
         var i;
         var dv = new SpiceDataView(a);
-        this.time_stamp = [];
-        this.time_stamp[0] = dv.getUint32(at, true); at += 4;
-        this.time_stamp[1] = dv.getUint32(at, true); at += 4;
+        this.time_stamp = dv.getUint64(at, true); at += 8;
         this.severity = dv.getUint32(at, true); at += 4;
         this.visibility = dv.getUint32(at, true); at += 4;
         this.what = dv.getUint32(at, true); at += 4;
@@ -807,7 +805,7 @@ SpiceMsgDisplayStreamCreate.prototype =
         this.id = dv.getUint32(at, true); at += 4;
         this.flags = dv.getUint8(at, true); at += 1;
         this.codec_type = dv.getUint8(at, true); at += 1;
-        /*stamp */ at += 8;
+        this.stamp = dv.getUint64(at, true); at += 8;
         this.stream_width = dv.getUint32(at, true); at += 4;
         this.stream_height = dv.getUint32(at, true); at += 4;
         this.src_width = dv.getUint32(at, true); at += 4;
