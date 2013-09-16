@@ -881,3 +881,27 @@ SpiceMsgDisplayStreamDestroy.prototype =
         this.id = dv.getUint32(at, true); at += 4;
     },
 }
+
+function SpiceMsgDisplayInvalList(a, at)
+{
+    this.count = 0;
+    this.resources = [];
+    this.from_buffer(a,at);
+}
+
+SpiceMsgDisplayInvalList.prototype =
+{
+    from_buffer: function (a, at)
+    {
+        var i;
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.count = dv.getUint16(at, true); at += 2;
+        for (i = 0; i < this.count; i++)
+        {
+            this.resources[i] = {};
+            this.resources[i].type = dv.getUint8(at, true); at++;
+            this.resources[i].id = dv.getUint64(at, true); at += 8;
+        }
+    },
+}
