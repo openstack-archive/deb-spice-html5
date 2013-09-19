@@ -30,6 +30,19 @@ file for Apache, but should work with any web server.
 
 
 %changelog
+* Thu Sep 19 2013 Jeremy White <jwhite@codeweavers.com> 0.1.4-1
+- Reduce memory leaks
+- Ack every message.
+- Aric Stewart: Fix and implement cache handling
+- Jordan Pittier: Fix default websocket port detection in spice_auto.html
+- Alon Levy: remove default password
+- Thomas Goirand - Adds missing mapping of the alphanumeric minus key
+
+* Thu May 23 2013 Jeremy White <jwhite@codeweavers.com> 0.1.3-1
+- Correct spice_auto.html for a missing include for the spice array buffer.
+- Provide limited compatibility for IE10.
+- Amos Benari: added on succeess event and added sendCtrlAltDel method.
+
 * Mon Feb 25 2013 Jeremy White <jwhite@codeweavers.com> 0.1.2-2
 - Revise the .spec file to use %%{name}, and remove a few uneeded statements
 - No longer install apache.conf, just put a sample under doc/
