@@ -1,3 +1,9 @@
+spice-html5 (0.1.4-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 09 Oct 2013 22:18:04 +0800
+
 spice-html5 (0~0+20130318+ec9ae0cbd6-3) unstable; urgency=low
 
   * Added patch for the minus char mapping (on the alpha keyboard).

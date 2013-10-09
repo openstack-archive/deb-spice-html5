@@ -2,10 +2,8 @@ Source: spice-html5
 Section: web
 Priority: extra
 Maintainer: PKG OpenStack <openstack-devel@lists.alioth.debian.org>
-Uploaders: Loic Dachary (OuoU) <loic@debian.org>,
-           Julien Danjou <acid@debian.org>,
+Uploaders: Julien Danjou <acid@debian.org>,
            Thomas Goirand <zigo@debian.org>,
-           Ghe Rivero <ghe.rivero@stackops.com>,
            Mehdi Abaakouk <sileht@sileht.net>,
            Liang Guo <guoliang@debian.org>
 Build-Depends: debhelper (>= 9), openstack-pkg-tools
