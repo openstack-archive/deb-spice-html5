@@ -1,6 +1,8 @@
 spice-html5 (0.1.4-1) unstable; urgency=low
 
   * New upstream release.
+  * Removes the minus char mapping patch which is now in upstream code as they
+    accepted my patch.
 
  -- Thomas Goirand <zigo@debian.org>  Wed, 09 Oct 2013 22:18:04 +0800
 
