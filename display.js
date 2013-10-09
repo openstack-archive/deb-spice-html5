@@ -527,6 +527,16 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         this.streams[m.id] = undefined;
         return true;
     }
+    if (msg.type == SPICE_MSG_DISPLAY_INVAL_LIST)
+    {
+        var m = new SpiceMsgDisplayInvalList(msg.data);
+        var i;
+        DEBUG > 1 && console.log(this.type + ": MsgInvalList " + m.count + " items");
+        for (i = 0; i < m.count; i++)
+            if (this.cache[m.resources[i].id] != undefined)
+                delete this.cache[m.resources[i].id];
+        return true;
+    }
 
     return false;
 }
@@ -575,7 +585,7 @@ SpiceDisplayConn.prototype.draw_copy_helper = function(o)
     if (o.descriptor && (o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
     {
         if (! ("cache" in this))
-            this.cache = [];
+            this.cache = {};
         this.cache[o.descriptor.id] = o.image_data;
     }
 
@@ -721,6 +731,8 @@ function handle_mouseover(e)
 
 function handle_mouseout(e)
 {
+    if (this.sc && this.sc.cursor && this.sc.cursor.spice_simulated_cursor)
+        this.sc.cursor.spice_simulated_cursor.style.display = 'none';
     this.blur();
 }
 
@@ -764,7 +776,7 @@ function handle_draw_jpeg_onload()
             (this.o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
         {
             if (! ("cache" in this.o.sc))
-                this.o.sc.cache = [];
+                this.o.sc.cache = {};
 
             this.o.sc.cache[this.o.descriptor.id] = 
                 t.getImageData(0, 0,
@@ -776,11 +788,15 @@ function handle_draw_jpeg_onload()
     {
         context.drawImage(this, this.o.base.box.left, this.o.base.box.top);
 
+        // Give the Garbage collector a clue to recycle this; avoids
+        //  fairly massive memory leaks during video playback
+        this.src = null;
+
         if (this.o.descriptor && 
             (this.o.descriptor.flags & SPICE_IMAGE_FLAGS_CACHE_ME))
         {
             if (! ("cache" in this.o.sc))
-                this.o.sc.cache = [];
+                this.o.sc.cache = {};
 
             this.o.sc.cache[this.o.descriptor.id] = 
                 context.getImageData(this.o.base.box.left, this.o.base.box.top,

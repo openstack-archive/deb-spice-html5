@@ -28,6 +28,7 @@
     <head>
 
         <title>Spice Javascript client</title>
+        <script src="spicearraybuffer.js"></script> 
         <script src="enums.js"></script> 
         <script src="atKeynames.js"></script> 
         <script src="utils.js"></script> 
@@ -43,6 +44,7 @@
         <script src="display.js"></script> 
         <script src="main.js"></script> 
         <script src="inputs.js"></script> 
+        <script src="simulatecursor.js"></script>
         <script src="cursor.js"></script> 
         <script src="thirdparty/jsbn.js"></script>
         <script src="thirdparty/rsa.js"></script>
@@ -117,7 +119,7 @@
             <span class="logo">SPICE</span>
             <label for="host">Host:</label> <input type='text' id='host' value='localhost'> <!-- localhost -->
             <label for="port">Port:</label> <input type='text' id='port' value='5959'>
-            <label for="password">Password:</label> <input type='password' id='password' value='spicy'>
+            <label for="password">Password:</label> <input type='password' id='password' value=''>
             <button id="connectButton" onclick="connect();">Start</button>
         </div>
 

@@ -318,19 +318,17 @@ SpiceConn.prototype =
         var rc;
         DEBUG > 0 && console.log("<< hdr " + this.channel_type() + " type " + msg.type + " size " + (msg.data && msg.data.byteLength));
         rc = this.process_common_messages(msg);
-        if (rc)
-            return rc;
-
-        if (this.process_channel_message)
-            rc = this.process_channel_message(msg);
-        else
-        {
-            this.log_err(this.type + ": No message handlers for this channel; message " + msg.type);
-            return false;
-        }
-
         if (! rc)
-            this.log_warn(this.type + ": Unknown message type " + msg.type + "!");
+        {
+            if (this.process_channel_message)
+            {
+                rc = this.process_channel_message(msg);
+                if (! rc)
+                    this.log_warn(this.type + ": Unknown message type " + msg.type + "!");
+            }
+            else
+                this.log_err(this.type + ": No message handlers for this channel; message " + msg.type);
+        }
 
         if (this.msgs_until_ack !== undefined && this.ack_window)
         {

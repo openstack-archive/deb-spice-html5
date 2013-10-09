@@ -414,9 +414,7 @@ SpiceMsgNotify.prototype =
         at = at || 0;
         var i;
         var dv = new SpiceDataView(a);
-        this.time_stamp = [];
-        this.time_stamp[0] = dv.getUint32(at, true); at += 4;
-        this.time_stamp[1] = dv.getUint32(at, true); at += 4;
+        this.time_stamp = dv.getUint64(at, true); at += 8;
         this.severity = dv.getUint32(at, true); at += 4;
         this.visibility = dv.getUint32(at, true); at += 4;
         this.what = dv.getUint32(at, true); at += 4;
@@ -445,8 +443,7 @@ SpiceMsgcDisplayInit.prototype =
         at = at || 0;
         var dv = new SpiceDataView(a);
         dv.setUint8(at, this.pixmap_cache_id, true); at++;
-        dv.setUint32(at, 0, true); at += 4;
-        dv.setUint32(at, this.pixmap_cache_size, true); at += 4;
+        dv.setUint64(at, this.pixmap_cache_size, true); at += 8;
         dv.setUint8(at, this.glz_dictionary_id, true); at++;
         dv.setUint32(at, this.glz_dictionary_window_size, true); at += 4;
     },
@@ -639,8 +636,11 @@ function SpiceMsgcMousePosition(sc, e)
     this.buttons_state = sc.buttons_state;
     if (e)
     {
-        this.x = e.clientX - sc.display.surfaces[sc.display.primary_surface].canvas.offsetLeft + document.body.scrollLeft;
-        this.y = e.clientY - sc.display.surfaces[sc.display.primary_surface].canvas.offsetTop + document.body.scrollTop;
+        var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+        var scrollLeft = document.body.scrollLeft || document.documentElement.scrollLeft;
+
+        this.x = e.clientX - sc.display.surfaces[sc.display.primary_surface].canvas.offsetLeft + scrollLeft;
+        this.y = e.clientY - sc.display.surfaces[sc.display.primary_surface].canvas.offsetTop + scrollTop;
         sc.mousex = this.x;
         sc.mousey = this.y; 
     }
@@ -805,7 +805,7 @@ SpiceMsgDisplayStreamCreate.prototype =
         this.id = dv.getUint32(at, true); at += 4;
         this.flags = dv.getUint8(at, true); at += 1;
         this.codec_type = dv.getUint8(at, true); at += 1;
-        /*stamp */ at += 8;
+        this.stamp = dv.getUint64(at, true); at += 8;
         this.stream_width = dv.getUint32(at, true); at += 4;
         this.stream_height = dv.getUint32(at, true); at += 4;
         this.src_width = dv.getUint32(at, true); at += 4;
@@ -879,5 +879,29 @@ SpiceMsgDisplayStreamDestroy.prototype =
         at = at || 0;
         var dv = new SpiceDataView(a);
         this.id = dv.getUint32(at, true); at += 4;
+    },
+}
+
+function SpiceMsgDisplayInvalList(a, at)
+{
+    this.count = 0;
+    this.resources = [];
+    this.from_buffer(a,at);
+}
+
+SpiceMsgDisplayInvalList.prototype =
+{
+    from_buffer: function (a, at)
+    {
+        var i;
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.count = dv.getUint16(at, true); at += 2;
+        for (i = 0; i < this.count; i++)
+        {
+            this.resources[i] = {};
+            this.resources[i].type = dv.getUint8(at, true); at++;
+            this.resources[i].id = dv.getUint64(at, true); at += 8;
+        }
     },
 }

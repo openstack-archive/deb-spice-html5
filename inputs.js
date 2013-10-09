@@ -98,6 +98,15 @@ function handle_mousemove(e)
             DEBUG > 0 && this.sc.log_info("Discarding mouse motion");
         }
     }
+
+    if (this.sc && this.sc.cursor && this.sc.cursor.spice_simulated_cursor)
+    {
+        this.sc.cursor.spice_simulated_cursor.style.display = 'block';
+        this.sc.cursor.spice_simulated_cursor.style.left = e.pageX - this.sc.cursor.spice_simulated_cursor.spice_hot_x + 'px';
+        this.sc.cursor.spice_simulated_cursor.style.top = e.pageY - this.sc.cursor.spice_simulated_cursor.spice_hot_y + 'px';
+        e.preventDefault();
+    }
+
 }
 
 function handle_mousedown(e)

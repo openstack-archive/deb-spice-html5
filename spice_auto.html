@@ -28,6 +28,7 @@
     <head>
 
         <title>Spice Javascript client</title>
+        <script src="spicearraybuffer.js"></script> 
         <script src="enums.js"></script>
         <script src="atKeynames.js"></script>
         <script src="utils.js"></script>
@@ -43,6 +44,7 @@
         <script src="display.js"></script>
         <script src="main.js"></script>
         <script src="inputs.js"></script>
+        <script src="simulatecursor.js"></script>
         <script src="cursor.js"></script>
         <script src="thirdparty/jsbn.js"></script>
         <script src="thirdparty/rsa.js"></script>
@@ -83,7 +85,20 @@
 
                 // By default, use the host and port of server that served this file
                 host = spice_query_var('host', window.location.hostname);
-                port = spice_query_var('port', window.location.port);
+
+                // Note that using the web server port only makes sense
+                //  if your web server has a reverse proxy to relay the WebSocket
+                //  traffic to the correct destination port.
+                var default_port = window.location.port;
+                if (!default_port) {
+                    if (window.location.protocol == 'http:') {
+                        default_port = 80;
+                    }
+                    else if (window.location.protocol == 'https:') {
+                        default_port = 443;
+                    }
+                }
+                port = spice_query_var('port', default_port);
 
                 // If a token variable is passed in, set the parameter in a cookie.
                 // This is used by nova-spiceproxy.
