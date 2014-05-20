@@ -121,6 +121,11 @@ SpiceConn.prototype =
             (1 << SPICE_COMMON_CAP_MINI_HEADER)
             );
 
+        if (msg.channel_type == SPICE_CHANNEL_PLAYBACK)
+            msg.channel_caps.push(
+                (1 << SPICE_PLAYBACK_CAP_OPUS)
+            );
+
         hdr.size = msg.buffer_size();
 
         var mb = new ArrayBuffer(hdr.buffer_size() + msg.buffer_size());

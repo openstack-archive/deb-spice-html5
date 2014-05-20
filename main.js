@@ -129,6 +129,8 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
             }
             else if (chans.channels[i].type == SPICE_CHANNEL_CURSOR)
                 this.cursor = new SpiceCursorConn(conn);
+            else if (chans.channels[i].type == SPICE_CHANNEL_PLAYBACK)
+                this.cursor = new SpicePlaybackConn(conn);
             else
             {
                 this.log_err("Channel type " + chans.channels[i].type + " unknown.");

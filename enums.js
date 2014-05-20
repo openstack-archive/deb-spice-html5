@@ -148,6 +148,26 @@ var SPICE_MSG_CURSOR_TRAIL              = 106;
 var SPICE_MSG_CURSOR_INVAL_ONE          = 107;
 var SPICE_MSG_CURSOR_INVAL_ALL          = 108;
 
+var SPICE_MSG_PLAYBACK_DATA             = 101;
+var SPICE_MSG_PLAYBACK_MODE             = 102;
+var SPICE_MSG_PLAYBACK_START            = 103;
+var SPICE_MSG_PLAYBACK_STOP             = 104;
+var SPICE_MSG_PLAYBACK_VOLUME           = 105;
+var SPICE_MSG_PLAYBACK_MUTE             = 106;
+var SPICE_MSG_PLAYBACK_LATENCY          = 107;
+
+var SPICE_PLAYBACK_CAP_CELT_0_5_1       = 0;
+var SPICE_PLAYBACK_CAP_VOLUME           = 1;
+var SPICE_PLAYBACK_CAP_LATENCY          = 2;
+var SPICE_PLAYBACK_CAP_OPUS             = 3;
+
+var SPICE_AUDIO_DATA_MODE_INVALID       = 0;
+var SPICE_AUDIO_DATA_MODE_RAW           = 1;
+var SPICE_AUDIO_DATA_MODE_CELT_0_5_1    = 2;
+var SPICE_AUDIO_DATA_MODE_OPUS          = 3;
+
+var SPICE_AUDIO_FMT_INVALID             = 0;
+var SPICE_AUDIO_FMT_S16                 = 1;
 
 var SPICE_CHANNEL_MAIN                  = 1;
 var SPICE_CHANNEL_DISPLAY               = 2;

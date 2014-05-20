@@ -608,6 +608,69 @@ SpiceMsgCursorInit.prototype =
     },
 }
 
+function SpiceMsgPlaybackData(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgPlaybackData.prototype =
+{
+    from_buffer: function(a, at, mb)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.time = dv.getUint32(at, true); at += 4;
+        if (a.byteLength > at)
+        {
+            this.data = a.slice(at);
+            at += this.data.byteLength;
+        }
+        return at;
+    },
+}
+
+function SpiceMsgPlaybackMode(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgPlaybackMode.prototype =
+{
+    from_buffer: function(a, at, mb)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.time = dv.getUint32(at, true); at += 4;
+        this.mode = dv.getUint16(at, true); at += 2;
+        if (a.byteLength > at)
+        {
+            this.data = a.slice(at);
+            at += this.data.byteLength;
+        }
+        return at;
+    },
+}
+
+function SpiceMsgPlaybackStart(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgPlaybackStart.prototype =
+{
+    from_buffer: function(a, at, mb)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.channels = dv.getUint32(at, true); at += 4;
+        this.format = dv.getUint16(at, true); at += 2;
+        this.frequency = dv.getUint32(at, true); at += 4;
+        this.time = dv.getUint32(at, true); at += 4;
+        return at;
+    },
+}
+
+
 
 function SpiceMsgCursorSet(a, at)
 {
