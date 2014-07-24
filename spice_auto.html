@@ -99,6 +99,9 @@
                     }
                 }
                 port = spice_query_var('port', default_port);
+                if (window.location.protocol == 'https:') {
+                    scheme = "wss://";
+                }
 
                 // If a token variable is passed in, set the parameter in a cookie.
                 // This is used by nova-spiceproxy.
