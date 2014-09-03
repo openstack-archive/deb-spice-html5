@@ -402,6 +402,83 @@ SpiceMsgcMainMouseModeRequest.prototype =
     }
 }
 
+function SpiceMsgcMainAgentStart(num_tokens)
+{
+    this.num_tokens = num_tokens;
+}
+
+SpiceMsgcMainAgentStart.prototype =
+{
+    to_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        dv.setUint32(at, this.num_tokens, true); at += 4;
+    },
+    buffer_size: function()
+    {
+        return 4;
+    }
+}
+
+function SpiceMsgcMainAgentData(type, data)
+{
+    this.protocol = VD_AGENT_PROTOCOL;
+    this.type = type;
+    this.opaque = 0;
+    this.size = data.buffer_size();
+    this.data = data;
+}
+
+SpiceMsgcMainAgentData.prototype =
+{
+    to_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        dv.setUint32(at, this.protocol, true); at += 4;
+        dv.setUint32(at, this.type, true); at += 4;
+        dv.setUint64(at, this.opaque, true); at += 8;
+        dv.setUint32(at, this.size, true); at += 4;
+        this.data.to_buffer(a, at);
+    },
+    buffer_size: function()
+    {
+        return 4 + 4 + 8 + 4 + this.data.buffer_size();
+    }
+}
+
+function VDAgentMonitorsConfig(flags, width, height, depth, x, y)
+{
+    this.num_mon = 1;
+    this.flags = flags;
+    this.width = width;
+    this.height = height;
+    this.depth = depth;
+    this.x = x;
+    this.y = y;
+}
+
+VDAgentMonitorsConfig.prototype =
+{
+    to_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        dv.setUint32(at, this.num_mon, true); at += 4;
+        dv.setUint32(at, this.flags, true); at += 4;
+        dv.setUint32(at, this.height, true); at += 4;
+        dv.setUint32(at, this.width, true); at += 4;
+        dv.setUint32(at, this.depth, true); at += 4;
+        dv.setUint32(at, this.x, true); at += 4;
+        dv.setUint32(at, this.y, true); at += 4;
+    },
+    buffer_size: function()
+    {
+        return 28;
+    }
+}
+
 function SpiceMsgNotify(a, at)
 {
     this.from_buffer(a, at);

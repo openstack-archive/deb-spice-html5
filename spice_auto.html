@@ -54,6 +54,7 @@
         <script src="thirdparty/rng.js"></script>
         <script src="thirdparty/sha1.js"></script>
         <script src="ticket.js"></script>
+        <script src="resize.js"></script>
         <link rel="stylesheet" type="text/css" href="spice.css" />
 
         <script>
@@ -129,7 +130,7 @@
                 try
                 {
                     sc = new SpiceMainConn({uri: uri, screen_id: "spice-screen", dump_id: "debug-div",
-                                message_id: "message-div", password: password, onerror: spice_error });
+                                message_id: "message-div", password: password, onerror: spice_error, onagent: agent_connected });
                 }
                 catch (e)
                 {
@@ -146,6 +147,14 @@
                     sc.stop();
                 }
                 console.log("<< disconnect");
+            }
+
+            function agent_connected(sc)
+            {
+                window.addEventListener('resize', handle_resize);
+                window.spice_connection = this;
+
+                resize_helper(this);
             }
 
             connect();

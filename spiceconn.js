@@ -57,6 +57,8 @@ function SpiceConn(o)
         this.onerror = o.onerror;
     if (o.onsuccess !== undefined)
         this.onsuccess = o.onsuccess;
+    if (o.onagent !== undefined)
+        this.onagent = o.onagent;
 
     this.state = "connecting";
     this.ws.parent = this;

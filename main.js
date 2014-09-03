@@ -40,6 +40,9 @@
 **          onerror     (optional)  If given, a function to receive async
 **                                  errors.  Note that you should also catch
 **                                  errors for ones that occur inline
+**          onagent     (optional)  If given, a function to be called when
+**                                  a VD agent is connected; a good opportunity
+**                                  to request a resize
 **
 **  Throws error if there are troubles.  Requires a modern (by 2012 standards)
 **      browser, including WebSocket and WebSocket.binaryType == arraybuffer
@@ -78,15 +81,11 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
                           " ; ram_hint "                + this.main_init.ram_hint);
         }
 
-        this.mouse_mode = this.main_init.current_mouse_mode;
-        if (this.main_init.current_mouse_mode != SPICE_MOUSE_MODE_CLIENT &&
-            (this.main_init.supported_mouse_modes & SPICE_MOUSE_MODE_CLIENT))
-        {
-            var mode_request = new SpiceMsgcMainMouseModeRequest(SPICE_MOUSE_MODE_CLIENT);
-            var mr = new SpiceMiniData();
-            mr.build_msg(SPICE_MSGC_MAIN_MOUSE_MODE_REQUEST, mode_request);
-            this.send_msg(mr);
-        }
+        this.handle_mouse_mode(this.main_init.current_mouse_mode,
+                               this.main_init.supported_mouse_modes);
+
+        if (this.main_init.agent_connected)
+            this.connect_agent();
 
         var attach = new SpiceMiniData;
         attach.type = SPICE_MSGC_MAIN_ATTACH_CHANNELS;
@@ -99,9 +98,7 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
     {
         var mode = new SpiceMsgMainMouseMode(msg.data);
         DEBUG > 0 && this.log_info("Mouse supported modes " + mode.supported_modes + "; current " + mode.current_mode);
-        this.mouse_mode = mode.current_mode;
-        if (this.inputs)
-            this.inputs.mouse_mode = mode.current_mode;
+        this.handle_mouse_mode(mode.current_mode, mode.supported_modes);
         return true;
     }
 
@@ -144,6 +141,19 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_MAIN_AGENT_CONNECTED ||
+        msg.type == SPICE_MSG_MAIN_AGENT_CONNECTED_TOKENS)
+    {
+        this.connect_agent();
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_AGENT_DISCONNECTED)
+    {
+        this.agent_connected = false;
+        return true;
+    }
+
     return false;
 }
 
@@ -177,3 +187,45 @@ SpiceMainConn.prototype.stop = function(msg)
             this.extra_channels[e].cleanup();
     this.extra_channels = undefined;
 }
+
+SpiceMainConn.prototype.resize_window = function(flags, width, height, depth, x, y)
+{
+    if (this.agent_connected > 0)
+    {
+        var monitors_config = new VDAgentMonitorsConfig(flags, width, height, depth, x, y);
+        var agent_data = new SpiceMsgcMainAgentData(VD_AGENT_MONITORS_CONFIG, monitors_config);
+        var mr = new SpiceMiniData();
+        mr.build_msg(SPICE_MSGC_MAIN_AGENT_DATA, agent_data);
+        this.send_msg(mr);
+    }
+}
+
+SpiceMainConn.prototype.connect_agent = function()
+{
+    this.agent_connected = true;
+
+    var agent_start = new SpiceMsgcMainAgentStart(0);
+    var mr = new SpiceMiniData();
+    mr.build_msg(SPICE_MSGC_MAIN_AGENT_START, agent_start);
+    this.send_msg(mr);
+
+    if (this.onagent !== undefined)
+        this.onagent(this);
+
+}
+
+SpiceMainConn.prototype.handle_mouse_mode = function(current, supported)
+{
+    this.mouse_mode = current;
+    if (current != SPICE_MOUSE_MODE_CLIENT && (supported & SPICE_MOUSE_MODE_CLIENT))
+    {
+        var mode_request = new SpiceMsgcMainMouseModeRequest(SPICE_MOUSE_MODE_CLIENT);
+        var mr = new SpiceMiniData();
+        mr.build_msg(SPICE_MSGC_MAIN_MOUSE_MODE_REQUEST, mode_request);
+        this.send_msg(mr);
+    }
+
+    if (this.inputs)
+        this.inputs.mouse_mode = current;
+}
+

@@ -446,8 +446,9 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
             /* This .save() is done entirely to enable SPICE_MSG_DISPLAY_RESET */
             canvas.context.save();
             document.getElementById(this.parent.screen_id).appendChild(canvas);
-            document.getElementById(this.parent.screen_id).setAttribute('width', m.surface.width);
-            document.getElementById(this.parent.screen_id).setAttribute('height', m.surface.height);
+
+            /* We're going to leave width dynamic, but correctly set the height */
+            document.getElementById(this.parent.screen_id).style.height = m.surface.height + "px";
             this.hook_events();
         }
         return true;
