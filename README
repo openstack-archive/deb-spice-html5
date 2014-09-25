@@ -1,10 +1,10 @@
-Prototype Spice Javascript client
+Spice Javascript client
 
-Instructions and status as of June 1, 2012.
+Instructions and status as of September, 2014.
 
 Requirements:
 
-  1.  Modern Firefox or Chrome
+  1.  Modern Firefox or Chrome (IE will work, but badly)
       
   2.  A WebSocket proxy
 
@@ -18,10 +18,6 @@ Requirements:
       At this point, I've tested with qemu hosting
       a Fedora image, a Vista image, and with Xspice.  
       Vista was pretty bad; I recommend either Linux or Xspice.
-
-      ** Xspice has a processing issue; see this email:
-         http://lists.freedesktop.org/archives/spice-devel/2012-May/009020.html
-
 
 Optional:
   1.  A web server
@@ -46,6 +42,3 @@ Status:
 
   The TODO file should be a fairly comprehensive list of tasks
   required to make this client more fully functional.
-
-  As of June 1, 2012, this client is a nifty proof of concept,
-  but a long way from being a useful production tool.

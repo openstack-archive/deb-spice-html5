@@ -1,6 +1,6 @@
 Name:           spice-html5
 Version:        VERSION
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Pure Javascript SPICE client
 
 License:        LGPLv3
@@ -30,6 +30,11 @@ file for Apache, but should work with any web server.
 
 
 %changelog
+* Thu Sep 25 2014 Jeremy White <jwhite@codeweavers.com> 0.1.5-1
+- If an agent is attached, enable dynamic resizing of the guest screen.
+- Add support for audio streams using the Opus encoding.
+- Vladik Romanovsky: Use wss scheme when accessing with https protocol
+
 * Thu Sep 19 2013 Jeremy White <jwhite@codeweavers.com> 0.1.4-1
 - Reduce memory leaks
 - Ack every message.
