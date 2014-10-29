@@ -204,7 +204,7 @@ SpiceMainConn.prototype.connect_agent = function()
 {
     this.agent_connected = true;
 
-    var agent_start = new SpiceMsgcMainAgentStart(0);
+    var agent_start = new SpiceMsgcMainAgentStart(~0);
     var mr = new SpiceMiniData();
     mr.build_msg(SPICE_MSGC_MAIN_AGENT_START, agent_start);
     this.send_msg(mr);
