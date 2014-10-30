@@ -78,7 +78,9 @@ function SpiceConn(o)
         this.parent.state = "start";
     });
     this.ws.addEventListener('error', function(e) {
-        this.parent.log_err(">> WebSockets.onerror" + e.toString());
+        if ('url' in e.target) {
+            this.parent.log_err("WebSocket error: Can't connect to websocket on URL: " + e.target.url);
+        }
         this.parent.report_error(e);
     });
     this.ws.addEventListener('close', function(e) {
