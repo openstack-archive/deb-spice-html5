@@ -58,6 +58,7 @@ function SpiceMainConn()
     this.agent_msg_queue = [];
     this.file_xfer_tasks = {};
     this.file_xfer_task_id = 0;
+    this.file_xfer_read_queue = [];
 }
 
 SpiceMainConn.prototype = Object.create(SpiceConn.prototype);
@@ -161,9 +162,17 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
 
     if (msg.type == SPICE_MSG_MAIN_AGENT_TOKEN)
     {
-        var tokens = new SpiceMsgMainAgentTokens(msg.data);
+        var remaining_tokens, tokens = new SpiceMsgMainAgentTokens(msg.data);
         this.agent_tokens += tokens.num_tokens;
         this.send_agent_message_queue();
+
+        remaining_tokens = this.agent_tokens;
+        while (remaining_tokens > 0 && this.file_xfer_read_queue.length > 0)
+        {
+            var xfer_task = this.file_xfer_read_queue.shift();
+            this.file_xfer_read(xfer_task, xfer_task.read_bytes);
+            remaining_tokens--;
+        }
         return true;
     }
 
@@ -315,6 +324,13 @@ SpiceMainConn.prototype.file_xfer_read = function(file_xfer_task, start_byte)
 
     sb = start_byte || 0,
     eb = Math.min(sb + FILE_XFER_CHUNK_SIZE, file_xfer_task.file.size);
+
+    if (!this.agent_tokens)
+    {
+        file_xfer_task.read_bytes = sb;
+        this.file_xfer_read_queue.push(file_xfer_task);
+        return;
+    }
 
     reader = new FileReader();
     reader.onload = function(e)
