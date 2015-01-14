@@ -56,6 +56,8 @@ function SpiceMainConn()
     SpiceConn.apply(this, arguments);
 
     this.agent_msg_queue = [];
+    this.file_xfer_tasks = {};
+    this.file_xfer_task_id = 0;
 }
 
 SpiceMainConn.prototype = Object.create(SpiceConn.prototype);
@@ -171,6 +173,18 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_MAIN_AGENT_DATA)
+    {
+        var agent_data = new SpiceMsgMainAgentData(msg.data);
+        if (agent_data.type == VD_AGENT_FILE_XFER_STATUS)
+        {
+            this.handle_file_xfer_status(new VDAgentFileXferStatusMessage(agent_data.data));
+            return true;
+        }
+
+        return false;
+    }
+
     return false;
 }
 
@@ -243,6 +257,87 @@ SpiceMainConn.prototype.resize_window = function(flags, width, height, depth, x,
 {
     var monitors_config = new VDAgentMonitorsConfig(flags, width, height, depth, x, y);
     this.send_agent_message(VD_AGENT_MONITORS_CONFIG, monitors_config);
+}
+
+SpiceMainConn.prototype.file_xfer_start = function(file)
+{
+    var task_id, xfer_start, task;
+
+    task_id = this.file_xfer_task_id++;
+    task = new SpiceFileXferTask(task_id, file);
+    this.file_xfer_tasks[task_id] = task;
+    xfer_start = new VDAgentFileXferStartMessage(task_id, file.name, file.size);
+    this.send_agent_message(VD_AGENT_FILE_XFER_START, xfer_start);
+}
+
+SpiceMainConn.prototype.handle_file_xfer_status = function(file_xfer_status)
+{
+    var xfer_error, xfer_task;
+    if (!this.file_xfer_tasks[file_xfer_status.id])
+    {
+        return;
+    }
+    xfer_task = this.file_xfer_tasks[file_xfer_status.id];
+    switch (file_xfer_status.result)
+    {
+        case VD_AGENT_FILE_XFER_STATUS_CAN_SEND_DATA:
+            this.file_xfer_read(xfer_task);
+            return;
+        case VD_AGENT_FILE_XFER_STATUS_CANCELLED:
+            xfer_error = "transfer is cancelled by spice agent";
+            break;
+        case VD_AGENT_FILE_XFER_STATUS_ERROR:
+            xfer_error = "some errors occurred in the spice agent";
+            break;
+        case VD_AGENT_FILE_XFER_STATUS_SUCCESS:
+            break;
+        default:
+            xfer_error = "unhandled status type: " + file_xfer_status.result;
+            break;
+    }
+
+    this.file_xfer_completed(xfer_task, xfer_error)
+}
+
+SpiceMainConn.prototype.file_xfer_read = function(file_xfer_task, start_byte)
+{
+    var FILE_XFER_CHUNK_SIZE = 32 * VD_AGENT_MAX_DATA_SIZE;
+    var _this = this;
+    var sb, eb;
+    var slice, reader;
+
+    if (!file_xfer_task ||
+        !this.file_xfer_tasks[file_xfer_task.id] ||
+        (start_byte > 0 && start_byte == file_xfer_task.file.size))
+    {
+        return;
+    }
+
+    sb = start_byte || 0,
+    eb = Math.min(sb + FILE_XFER_CHUNK_SIZE, file_xfer_task.file.size);
+
+    reader = new FileReader();
+    reader.onload = function(e)
+    {
+        var xfer_data = new VDAgentFileXferDataMessage(file_xfer_task.id,
+                                                       e.target.result.byteLength,
+                                                       e.target.result);
+        _this.send_agent_message(VD_AGENT_FILE_XFER_DATA, xfer_data);
+        _this.file_xfer_read(file_xfer_task, eb);
+    };
+
+    slice = file_xfer_task.file.slice(sb, eb);
+    reader.readAsArrayBuffer(slice);
+}
+
+SpiceMainConn.prototype.file_xfer_completed = function(file_xfer_task, error)
+{
+    if (error)
+        this.log_err(error);
+    else
+        this.log_info("transfer of '" + file_xfer_task.file.name +"' was successful");
+
+    delete this.file_xfer_tasks[file_xfer_task.id];
 }
 
 SpiceMainConn.prototype.connect_agent = function()
