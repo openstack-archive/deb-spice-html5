@@ -224,9 +224,19 @@ SpiceMainConn.prototype.send_agent_message_queue = function(message)
 SpiceMainConn.prototype.send_agent_message = function(type, message)
 {
     var agent_data = new SpiceMsgcMainAgentData(type, message);
-    var mr = new SpiceMiniData();
-    mr.build_msg(SPICE_MSGC_MAIN_AGENT_DATA, agent_data);
-    this.send_agent_message_queue(mr);
+    var sb = 0, maxsize = VD_AGENT_MAX_DATA_SIZE - SpiceMiniData.prototype.buffer_size();
+    var data = new ArrayBuffer(agent_data.buffer_size());
+    agent_data.to_buffer(data);
+    while (sb < agent_data.buffer_size())
+    {
+        var eb = Math.min(sb + maxsize, agent_data.buffer_size());
+        var mr = new SpiceMiniData();
+        mr.type = SPICE_MSGC_MAIN_AGENT_DATA;
+        mr.size = eb - sb;
+        mr.data = data.slice(sb, eb);
+        this.send_agent_message_queue(mr);
+        sb = eb;
+    }
 }
 
 SpiceMainConn.prototype.resize_window = function(flags, width, height, depth, x, y)
