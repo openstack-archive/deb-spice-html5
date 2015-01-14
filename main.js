@@ -55,6 +55,7 @@ function SpiceMainConn()
 
     SpiceConn.apply(this, arguments);
 
+    this.agent_msg_queue = [];
 }
 
 SpiceMainConn.prototype = Object.create(SpiceConn.prototype);
@@ -160,6 +161,7 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
     {
         var tokens = new SpiceMsgMainAgentTokens(msg.data);
         this.agent_tokens += tokens.num_tokens;
+        this.send_agent_message_queue();
         return true;
     }
 
@@ -203,16 +205,34 @@ SpiceMainConn.prototype.stop = function(msg)
     this.extra_channels = undefined;
 }
 
+SpiceMainConn.prototype.send_agent_message_queue = function(message)
+{
+    if (!this.agent_connected)
+        return;
+
+    if (message)
+        this.agent_msg_queue.push(message);
+
+    while (this.agent_tokens > 0 && this.agent_msg_queue.length > 0)
+    {
+        var mr = this.agent_msg_queue.shift();
+        this.send_msg(mr);
+        this.agent_tokens--;
+    }
+}
+
+SpiceMainConn.prototype.send_agent_message = function(type, message)
+{
+    var agent_data = new SpiceMsgcMainAgentData(type, message);
+    var mr = new SpiceMiniData();
+    mr.build_msg(SPICE_MSGC_MAIN_AGENT_DATA, agent_data);
+    this.send_agent_message_queue(mr);
+}
+
 SpiceMainConn.prototype.resize_window = function(flags, width, height, depth, x, y)
 {
-    if (this.agent_connected > 0)
-    {
-        var monitors_config = new VDAgentMonitorsConfig(flags, width, height, depth, x, y);
-        var agent_data = new SpiceMsgcMainAgentData(VD_AGENT_MONITORS_CONFIG, monitors_config);
-        var mr = new SpiceMiniData();
-        mr.build_msg(SPICE_MSGC_MAIN_AGENT_DATA, agent_data);
-        this.send_msg(mr);
-    }
+    var monitors_config = new VDAgentMonitorsConfig(flags, width, height, depth, x, y);
+    this.send_agent_message(VD_AGENT_MONITORS_CONFIG, monitors_config);
 }
 
 SpiceMainConn.prototype.connect_agent = function()
