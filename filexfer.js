@@ -23,3 +23,25 @@ function SpiceFileXferTask(id, file)
     this.id = id;
     this.file = file;
 }
+
+function handle_file_dragover(e)
+{
+    e.stopPropagation();
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+}
+
+function handle_file_drop(e)
+{
+    var sc = window.spice_connection;
+    var files = e.dataTransfer.files;
+
+    e.stopPropagation();
+    e.preventDefault();
+    for (var i = files.length - 1; i >= 0; i--)
+    {
+        if (files[i].type); // do not copy a directory
+            sc.file_xfer_start(files[i]);
+    }
+
+}
