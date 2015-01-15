@@ -66,6 +66,7 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
         this.report_success("Connected")
         this.main_init = new SpiceMsgMainInit(msg.data);
         this.connection_id = this.main_init.session_id;
+        this.agent_tokens = this.main_init.agent_tokens;
 
         if (DEBUG > 0)
         {
@@ -141,10 +142,24 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
-    if (msg.type == SPICE_MSG_MAIN_AGENT_CONNECTED ||
-        msg.type == SPICE_MSG_MAIN_AGENT_CONNECTED_TOKENS)
+    if (msg.type == SPICE_MSG_MAIN_AGENT_CONNECTED)
     {
         this.connect_agent();
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_AGENT_CONNECTED_TOKENS)
+    {
+        var connected_tokens = new SpiceMsgMainAgentTokens(msg.data);
+        this.agent_tokens = connected_tokens.num_tokens;
+        this.connect_agent();
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_AGENT_TOKEN)
+    {
+        var tokens = new SpiceMsgMainAgentTokens(msg.data);
+        this.agent_tokens += tokens.num_tokens;
         return true;
     }
 

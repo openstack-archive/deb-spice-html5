@@ -348,6 +348,21 @@ SpiceMsgMainMouseMode.prototype =
     },
 }
 
+function SpiceMsgMainAgentTokens(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgMainAgentTokens.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.num_tokens = dv.getUint32(at, true); at += 4;
+    },
+}
+
 function SpiceMsgSetAck(a, at)
 {
     this.from_buffer(a, at);
