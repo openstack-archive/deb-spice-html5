@@ -185,7 +185,14 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
     if (msg.type == SPICE_MSG_MAIN_AGENT_DATA)
     {
         var agent_data = new SpiceMsgMainAgentData(msg.data);
-        if (agent_data.type == VD_AGENT_FILE_XFER_STATUS)
+        if (agent_data.type == VD_AGENT_ANNOUNCE_CAPABILITIES)
+        {
+            var agent_caps = new VDAgentAnnounceCapabilities(agent_data.data);
+            if (agent_caps.request)
+                this.announce_agent_capabilities(0);
+            return true;
+        }
+        else if (agent_data.type == VD_AGENT_FILE_XFER_STATUS)
         {
             this.handle_file_xfer_status(new VDAgentFileXferStatusMessage(agent_data.data));
             return true;
@@ -260,6 +267,14 @@ SpiceMainConn.prototype.send_agent_message = function(type, message)
         this.send_agent_message_queue(mr);
         sb = eb;
     }
+}
+
+SpiceMainConn.prototype.announce_agent_capabilities = function(request)
+{
+    var caps = new VDAgentAnnounceCapabilities(request, (1 << VD_AGENT_CAP_MOUSE_STATE) |
+                                                        (1 << VD_AGENT_CAP_MONITORS_CONFIG) |
+                                                        (1 << VD_AGENT_CAP_REPLY));
+    this.send_agent_message(VD_AGENT_ANNOUNCE_CAPABILITIES, caps);
 }
 
 SpiceMainConn.prototype.resize_window = function(flags, width, height, depth, x, y)
@@ -364,6 +379,8 @@ SpiceMainConn.prototype.connect_agent = function()
     var mr = new SpiceMiniData();
     mr.build_msg(SPICE_MSGC_MAIN_AGENT_START, agent_start);
     this.send_msg(mr);
+
+    this.announce_agent_capabilities(1);
 
     if (this.onagent !== undefined)
         this.onagent(this);

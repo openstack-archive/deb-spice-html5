@@ -486,6 +486,40 @@ SpiceMsgcMainAgentData.prototype =
     }
 }
 
+function VDAgentAnnounceCapabilities(request, caps)
+{
+    if (caps)
+    {
+        this.request = request;
+        this.caps = caps;
+    }
+    else
+        this.from_buffer(request);
+}
+
+VDAgentAnnounceCapabilities.prototype =
+{
+    to_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        dv.setUint32(at, this.request, true); at += 4;
+        dv.setUint32(at, this.caps, true); at += 4;
+    },
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.request = dv.getUint32(at, true); at += 4;
+        this.caps = dv.getUint32(at, true); at += 4;
+        return at;
+    },
+    buffer_size: function()
+    {
+        return 8;
+    }
+}
+
 function VDAgentMonitorsConfig(flags, width, height, depth, x, y)
 {
     this.num_mon = 1;
