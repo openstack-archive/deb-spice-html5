@@ -149,6 +149,8 @@
                 }
                 if (window.File && window.FileReader && window.FileList && window.Blob)
                 {
+                    var spice_xfer_area = document.getElementById('spice-xfer-area');
+                    document.getElementById('spice-area').removeChild(spice_xfer_area);
                     document.getElementById('spice-area').removeEventListener('dragover', handle_file_dragover, false);
                     document.getElementById('spice-area').removeEventListener('drop', handle_file_drop, false);
                 }
@@ -164,6 +166,8 @@
 
                 if (window.File && window.FileReader && window.FileList && window.Blob)
                 {
+                    var spice_xfer_area = document.createElement("div");
+                    spice_xfer_area.setAttribute('id', 'spice-xfer-area');
                     document.getElementById('spice-area').addEventListener('dragover', handle_file_dragover, false);
                     document.getElementById('spice-area').addEventListener('drop', handle_file_drop, false);
                 }

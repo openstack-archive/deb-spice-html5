@@ -289,6 +289,7 @@ SpiceMainConn.prototype.file_xfer_start = function(file)
 
     task_id = this.file_xfer_task_id++;
     task = new SpiceFileXferTask(task_id, file);
+    task.create_progressbar();
     this.file_xfer_tasks[task_id] = task;
     xfer_start = new VDAgentFileXferStartMessage(task_id, file.name, file.size);
     this.send_agent_message(VD_AGENT_FILE_XFER_START, xfer_start);
@@ -355,6 +356,7 @@ SpiceMainConn.prototype.file_xfer_read = function(file_xfer_task, start_byte)
                                                        e.target.result);
         _this.send_agent_message(VD_AGENT_FILE_XFER_DATA, xfer_data);
         _this.file_xfer_read(file_xfer_task, eb);
+        file_xfer_task.update_progressbar(eb);
     };
 
     slice = file_xfer_task.file.slice(sb, eb);
@@ -367,6 +369,8 @@ SpiceMainConn.prototype.file_xfer_completed = function(file_xfer_task, error)
         this.log_err(error);
     else
         this.log_info("transfer of '" + file_xfer_task.file.name +"' was successful");
+
+    file_xfer_task.remove_progressbar();
 
     delete this.file_xfer_tasks[file_xfer_task.id];
 }
