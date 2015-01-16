@@ -338,6 +338,15 @@ SpiceMainConn.prototype.file_xfer_read = function(file_xfer_task, start_byte)
         return;
     }
 
+    if (file_xfer_task.cancelled)
+    {
+        var xfer_status = new VDAgentFileXferStatusMessage(file_xfer_task.id,
+                                                           VD_AGENT_FILE_XFER_STATUS_CANCELLED);
+        this.send_agent_message(VD_AGENT_FILE_XFER_STATUS, xfer_status);
+        delete this.file_xfer_tasks[file_xfer_task.id];
+        return;
+    }
+
     sb = start_byte || 0,
     eb = Math.min(sb + FILE_XFER_CHUNK_SIZE, file_xfer_task.file.size);
 

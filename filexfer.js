@@ -26,8 +26,19 @@ function SpiceFileXferTask(id, file)
 
 SpiceFileXferTask.prototype.create_progressbar = function()
 {
+    var _this = this;
+    var cancel = document.createElement("input");
     this.progressbar_container = document.createElement("div");
     this.progressbar = document.createElement("progress");
+
+    cancel.type = 'button';
+    cancel.value = 'Cancel';
+    cancel.style.float = 'right';
+    cancel.onclick = function()
+    {
+        _this.cancelled = true;
+        _this.remove_progressbar();
+    };
 
     this.progressbar.setAttribute('max', this.file.size);
     this.progressbar.setAttribute('value', 0);
@@ -38,6 +49,7 @@ SpiceFileXferTask.prototype.create_progressbar = function()
     this.progressbar_container.style.margin = 'auto';
     this.progressbar_container.style.padding = '4px';
     this.progressbar_container.textContent = this.file.name;
+    this.progressbar_container.appendChild(cancel);
     this.progressbar_container.appendChild(this.progressbar);
     document.getElementById('spice-xfer-area').appendChild(this.progressbar_container);
 }
