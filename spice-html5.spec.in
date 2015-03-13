@@ -30,6 +30,13 @@ file for Apache, but should work with any web server.
 
 
 %changelog
+* Fri Mar 13 2015 Jeremy White <jwhite@codeweavers.com> 0.1.6-1
+- Pavel Grunt: Implement file transfer from client to guest
+- Pavel Grunt: Report agent capabilities, handle agent tokens
+- Pavel Grunt: Use WheelEvent instead of MouseWheelEvent
+- Frantisek Kobzik: Improve error messages
+- Report a modern number of tokens
+
 * Thu Sep 25 2014 Jeremy White <jwhite@codeweavers.com> 0.1.5-1
 - If an agent is attached, enable dynamic resizing of the guest screen.
 - Add support for audio streams using the Opus encoding.

@@ -1,6 +1,6 @@
 Spice Javascript client
 
-Instructions and status as of September, 2014.
+Instructions and status as of March, 2015.
 
 Requirements:
 
@@ -11,7 +11,6 @@ Requirements:
       I've used websockify:
         https://github.com/kanaka/websockify
       works great.
-
 
   3.  A spice server
 

@@ -45,7 +45,7 @@ Big Tasks:
   . Profile the whole mess
     - Initial profiling suggests image decompression is the big hog
 
-  . Improve agent support
+  . Continue to improve agent support
 
   . Build a test suite for measuring performance
     - Latency, bandwidth, packet loss
