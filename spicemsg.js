@@ -1201,6 +1201,60 @@ SpiceMsgDisplayStreamDestroy.prototype =
     },
 }
 
+function SpiceMsgDisplayStreamActivateReport(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgDisplayStreamActivateReport.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.stream_id = dv.getUint32(at, true); at += 4;
+        this.unique_id = dv.getUint32(at, true); at += 4;
+        this.max_window_size = dv.getUint32(at, true); at += 4;
+        this.timeout_ms = dv.getUint32(at, true); at += 4;
+    },
+}
+
+function SpiceMsgcDisplayStreamReport(stream_id, unique_id)
+{
+    this.stream_id = stream_id;
+    this.unique_id = unique_id;
+    this.start_frame_mm_time = 0;
+    this.end_frame_mm_time = 0;
+    this.num_frames = 0;
+    this.num_drops = 0;
+    this.last_frame_delay = 0;
+
+    // TODO - Implement audio delay
+    this.audio_delay = -1;
+}
+
+SpiceMsgcDisplayStreamReport.prototype =
+{
+    to_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        dv.setUint32(at, this.stream_id, true); at += 4;
+        dv.setUint32(at, this.unique_id, true); at += 4;
+        dv.setUint32(at, this.start_frame_mm_time, true); at += 4;
+        dv.setUint32(at, this.end_frame_mm_time, true); at += 4;
+        dv.setUint32(at, this.num_frames, true); at += 4;
+        dv.setUint32(at, this.num_drops, true); at += 4;
+        dv.setUint32(at, this.last_frame_delay, true); at += 4;
+        dv.setUint32(at, this.audio_delay, true); at += 4;
+        return at;
+    },
+    buffer_size: function()
+    {
+        return 8 * 4;
+    }
+}
+
 function SpiceMsgDisplayInvalList(a, at)
 {
     this.count = 0;

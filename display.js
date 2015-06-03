@@ -477,30 +477,47 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
-    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DATA)
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DATA ||
+        msg.type == SPICE_MSG_DISPLAY_STREAM_DATA_SIZED)
     {
-        var m = new SpiceMsgDisplayStreamData(msg.data);
+        var m;
+        if (msg.type == SPICE_MSG_DISPLAY_STREAM_DATA_SIZED)
+            m = new SpiceMsgDisplayStreamDataSized(msg.data);
+        else
+            m = new SpiceMsgDisplayStreamData(msg.data);
+
         if (!this.streams[m.base.id])
         {
             console.log("no stream for data");
             return false;
         }
-        if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
-        {
-            process_mjpeg_stream_data(this, m);
 
-        }
+        var mmtime = (Date.now() - this.parent.our_mm_time) + this.parent.mm_time;
+        var latency = m.base.multi_media_time - mmtime;
+
+        if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
+            process_mjpeg_stream_data(this, m, latency);
+
+        if ("report" in this.streams[m.base.id])
+            process_stream_data_report(this, m, mmtime, latency);
+
         return true;
     }
 
-    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DATA_SIZED)
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_ACTIVATE_REPORT)
     {
-        var m = new SpiceMsgDisplayStreamDataSized(msg.data);
-        if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
-            process_mjpeg_stream_data(this, m);
+        var m = new SpiceMsgDisplayStreamActivateReport(msg.data);
+
+        var report = new SpiceMsgcDisplayStreamReport(m.stream_id, m.unique_id);
+        if (this.streams[m.stream_id])
+        {
+            this.streams[m.stream_id].report = report;
+            this.streams[m.stream_id].max_window_size = m.max_window_size;
+            this.streams[m.stream_id].timeout_ms = m.timeout_ms
+        }
+
         return true;
     }
-
 
     if (msg.type == SPICE_MSG_DISPLAY_STREAM_CLIP)
     {
@@ -811,8 +828,15 @@ function handle_draw_jpeg_onload()
     }
 }
 
-function process_mjpeg_stream_data(sc, m)
+function process_mjpeg_stream_data(sc, m, latency)
 {
+    if (latency < 0)
+    {
+        if ("report" in sc.streams[m.base.id])
+            sc.streams[m.base.id].report.num_drops++;
+        return;
+    }
+
     var tmpstr = "data:image/jpeg,";
     var img = new Image;
     var i;
@@ -837,3 +861,24 @@ function process_mjpeg_stream_data(sc, m)
     img.src = tmpstr;
 }
 
+function process_stream_data_report(sc, m, mmtime, latency)
+{
+    sc.streams[m.base.id].report.num_frames++;
+    if (sc.streams[m.base.id].report.start_frame_mm_time == 0)
+        sc.streams[m.base.id].report.start_frame_mm_time = m.base.multi_media_time;
+
+    if (sc.streams[m.base.id].report.num_frames > sc.streams[m.base.id].max_window_size ||
+        (m.base.multi_media_time - sc.streams[m.base.id].report.start_frame_mm_time) > sc.streams[m.base.id].timeout_ms)
+    {
+        sc.streams[m.base.id].report.end_frame_mm_time = m.base.multi_media_time;
+        sc.streams[m.base.id].report.last_frame_delay = latency;
+
+        var msg = new SpiceMiniData();
+        msg.build_msg(SPICE_MSGC_DISPLAY_STREAM_REPORT, sc.streams[m.base.id].report);
+        sc.send_msg(msg);
+
+        sc.streams[m.base.id].report.start_frame_mm_time = 0;
+        sc.streams[m.base.id].report.num_frames = 0;
+        sc.streams[m.base.id].report.num_drops = 0;
+    }
+}

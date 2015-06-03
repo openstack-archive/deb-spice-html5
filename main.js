@@ -86,6 +86,9 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
                           " ; ram_hint "                + this.main_init.ram_hint);
         }
 
+        this.our_mm_time = Date.now();
+        this.mm_time = this.main_init.multi_media_time;
+
         this.handle_mouse_mode(this.main_init.current_mouse_mode,
                                this.main_init.supported_mouse_modes);
 

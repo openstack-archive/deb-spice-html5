@@ -135,7 +135,8 @@ SpiceConn.prototype =
             );
         else if (msg.channel_type == SPICE_CHANNEL_DISPLAY)
             msg.channel_caps.push(
-                (1 << SPICE_DISPLAY_CAP_SIZED_STREAM)
+                (1 << SPICE_DISPLAY_CAP_SIZED_STREAM) |
+                (1 << SPICE_DISPLAY_CAP_STREAM_REPORT)
             );
 
         hdr.size = msg.buffer_size();
