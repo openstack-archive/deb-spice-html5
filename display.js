@@ -469,11 +469,11 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         if (!this.streams)
             this.streams = new Array();
         if (this.streams[m.id])
-            console.log("Stream already exists");
+            console.log("Stream " + m.id + " already exists");
         else
             this.streams[m.id] = m;
         if (m.codec_type != SPICE_VIDEO_CODEC_TYPE_MJPEG)
-            console.log("Unhandled stream codec: "+m.codec_type);
+            console.log("Unhandled stream codec: " + m.codec_type);
         return true;
     }
 
