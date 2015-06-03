@@ -487,31 +487,20 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         }
         if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
         {
-            var tmpstr = "data:image/jpeg,";
-            var img = new Image;
-            var i;
-            for (i = 0; i < m.data.length; i++)
-            {
-                tmpstr +=  '%';
-                if (m.data[i] < 16)
-                tmpstr += '0';
-                tmpstr += m.data[i].toString(16);
-            }
-            var strm_base = new SpiceMsgDisplayBase();
-            strm_base.surface_id = this.streams[m.base.id].surface_id;
-            strm_base.box = this.streams[m.base.id].dest;
-            strm_base.clip = this.streams[m.base.id].clip;
-            img.o =
-                { base: strm_base,
-                  tag: "mjpeg." + m.base.id,
-                  descriptor: null,
-                  sc : this,
-                };
-            img.onload = handle_draw_jpeg_onload;
-            img.src = tmpstr;
+            process_mjpeg_stream_data(this, m);
+
         }
         return true;
     }
+
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DATA_SIZED)
+    {
+        var m = new SpiceMsgDisplayStreamDataSized(msg.data);
+        if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
+            process_mjpeg_stream_data(this, m);
+        return true;
+    }
+
 
     if (msg.type == SPICE_MSG_DISPLAY_STREAM_CLIP)
     {
@@ -821,3 +810,30 @@ function handle_draw_jpeg_onload()
         this.o.sc.surfaces[this.o.base.surface_id].draw_count++;
     }
 }
+
+function process_mjpeg_stream_data(sc, m)
+{
+    var tmpstr = "data:image/jpeg,";
+    var img = new Image;
+    var i;
+    for (i = 0; i < m.data.length; i++)
+    {
+        tmpstr +=  '%';
+        if (m.data[i] < 16)
+        tmpstr += '0';
+        tmpstr += m.data[i].toString(16);
+    }
+    var strm_base = new SpiceMsgDisplayBase();
+    strm_base.surface_id = sc.streams[m.base.id].surface_id;
+    strm_base.box = m.dest || sc.streams[m.base.id].dest;
+    strm_base.clip = sc.streams[m.base.id].clip;
+    img.o =
+        { base: strm_base,
+          tag: "mjpeg." + m.base.id,
+          descriptor: null,
+          sc : sc,
+        };
+    img.onload = handle_draw_jpeg_onload;
+    img.src = tmpstr;
+}
+

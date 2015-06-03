@@ -1146,6 +1146,29 @@ SpiceMsgDisplayStreamData.prototype =
     },
 }
 
+function SpiceMsgDisplayStreamDataSized(a, at)
+{
+    this.from_buffer(a, at);
+}
+
+SpiceMsgDisplayStreamDataSized.prototype =
+{
+    from_buffer: function(a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        this.base = new SpiceStreamDataHeader;
+        at = this.base.from_dv(dv, at, a);
+        this.width = dv.getUint32(at, true); at += 4;
+        this.height = dv.getUint32(at, true); at += 4;
+        this.dest = new SpiceRect;
+        at = this.dest.from_dv(dv, at, a);
+        this.data_size = dv.getUint32(at, true); at += 4;
+        this.data = dv.u8.subarray(at, at + this.data_size);
+    },
+}
+
+
 function SpiceMsgDisplayStreamClip(a, at)
 {
     this.from_buffer(a, at);
