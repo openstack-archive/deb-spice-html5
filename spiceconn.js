@@ -374,6 +374,20 @@ SpiceConn.prototype =
             return "inputs";
         else if (this.type == SPICE_CHANNEL_CURSOR)
             return "cursor";
+        else if (this.type == SPICE_CHANNEL_PLAYBACK)
+            return "playback";
+        else if (this.type == SPICE_CHANNEL_RECORD)
+            return "record";
+        else if (this.type == SPICE_CHANNEL_TUNNEL)
+            return "tunnel";
+        else if (this.type == SPICE_CHANNEL_SMARTCARD)
+            return "smartcard";
+        else if (this.type == SPICE_CHANNEL_USBREDIR)
+            return "usbredir";
+        else if (this.type == SPICE_CHANNEL_PORT)
+            return "port";
+        else if (this.type == SPICE_CHANNEL_WEBDAV)
+            return "webdav";
         return "unknown-" + this.type;
 
     },
