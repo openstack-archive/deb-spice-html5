@@ -159,6 +159,24 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_PLAYBACK_VOLUME)
+    {
+        this.known_unimplemented(msg.type, "Playback Volume");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_PLAYBACK_MUTE)
+    {
+        this.known_unimplemented(msg.type, "Playback Mute");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_PLAYBACK_LATENCY)
+    {
+        this.known_unimplemented(msg.type, "Playback Latency");
+        return true;
+    }
+
     return false;
 }
 

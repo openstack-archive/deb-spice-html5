@@ -73,6 +73,12 @@ SpiceCursorConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_CURSOR_MOVE)
+    {
+        this.known_unimplemented(msg.type, "Cursor Move");
+        return true;
+    }
+
     if (msg.type == SPICE_MSG_CURSOR_HIDE)
     {
         DEBUG > 1 && console.log("SpiceMsgCursorHide");
@@ -80,10 +86,22 @@ SpiceCursorConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_CURSOR_TRAIL)
+    {
+        this.known_unimplemented(msg.type, "Cursor Trail");
+        return true;
+    }
+
     if (msg.type == SPICE_MSG_CURSOR_RESET)
     {
         DEBUG > 1 && console.log("SpiceMsgCursorReset");
         document.getElementById(this.parent.screen_id).style.cursor = "auto";
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_CURSOR_INVAL_ONE)
+    {
+        this.known_unimplemented(msg.type, "Cursor Inval One");
         return true;
     }
 

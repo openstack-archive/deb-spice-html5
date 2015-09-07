@@ -64,6 +64,18 @@ function SpiceMainConn()
 SpiceMainConn.prototype = Object.create(SpiceConn.prototype);
 SpiceMainConn.prototype.process_channel_message = function(msg)
 {
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_BEGIN)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate Begin");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_CANCEL)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate Cancel");
+        return true;
+    }
+
     if (msg.type == SPICE_MSG_MAIN_INIT)
     {
         this.log_info("Connected to " + this.ws.url);
@@ -107,6 +119,12 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
         var mode = new SpiceMsgMainMouseMode(msg.data);
         DEBUG > 0 && this.log_info("Mouse supported modes " + mode.supported_modes + "; current " + mode.current_mode);
         this.handle_mouse_mode(mode.current_mode, mode.supported_modes);
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MULTI_MEDIA_TIME)
+    {
+        this.known_unimplemented(msg.type, "Main Multi Media Time");
         return true;
     }
 
@@ -202,6 +220,48 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
         }
 
         return false;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_SWITCH_HOST)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate Switch Host");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_END)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate End");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_NAME)
+    {
+        this.known_unimplemented(msg.type, "Main Name");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_UUID)
+    {
+        this.known_unimplemented(msg.type, "Main UUID");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_BEGIN_SEAMLESS)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate Begin Seamless");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_DST_SEAMLESS_ACK)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate Dst Seamless ACK");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_MAIN_MIGRATE_DST_SEAMLESS_NACK)
+    {
+        this.known_unimplemented(msg.type, "Main Migrate Dst Seamless NACK");
+        return true;
     }
 
     return false;

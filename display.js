@@ -62,6 +62,12 @@ function SpiceDisplayConn()
 SpiceDisplayConn.prototype = Object.create(SpiceConn.prototype);
 SpiceDisplayConn.prototype.process_channel_message = function(msg)
 {
+    if (msg.type == SPICE_MSG_DISPLAY_MODE)
+    {
+        this.known_unimplemented(msg.type, "Display Mode");
+        return true;
+    }
+
     if (msg.type == SPICE_MSG_DISPLAY_MARK)
     {
         // FIXME - DISPLAY_MARK not implemented (may be hard or impossible)
@@ -364,6 +370,60 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_OPAQUE)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Opaque");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_BLEND)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Blend");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_BLACKNESS)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Blackness");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_WHITENESS)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Whiteness");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_INVERS)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Invers");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_ROP3)
+    {
+        this.known_unimplemented(msg.type, "Display Draw ROP3");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_STROKE)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Stroke");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_TRANSPARENT)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Transparent");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_ALPHA_BLEND)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Alpha Blend");
+        return true;
+    }
+
     if (msg.type == SPICE_MSG_DISPLAY_COPY_BITS)
     {
         var copy_bits = new SpiceMsgDisplayCopyBits(msg.data);
@@ -397,6 +457,18 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
 
 
         this.surfaces[copy_bits.base.surface_id].draw_count++;
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_INVAL_ALL_PIXMAPS)
+    {
+        this.known_unimplemented(msg.type, "Display Inval All Pixmaps");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_INVAL_PALETTE)
+    {
+        this.known_unimplemented(msg.type, "Display Inval Palette");
         return true;
     }
 
@@ -532,6 +604,13 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         this.streams[m.id] = undefined;
         return true;
     }
+
+    if (msg.type == SPICE_MSG_DISPLAY_STREAM_DESTROY_ALL)
+    {
+        this.known_unimplemented(msg.type, "Display Stream Destroy All");
+        return true;
+    }
+
     if (msg.type == SPICE_MSG_DISPLAY_INVAL_LIST)
     {
         var m = new SpiceMsgDisplayInvalList(msg.data);
@@ -540,6 +619,18 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
         for (i = 0; i < m.count; i++)
             if (this.cache[m.resources[i].id] != undefined)
                 delete this.cache[m.resources[i].id];
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_MONITORS_CONFIG)
+    {
+        this.known_unimplemented(msg.type, "Display Monitors Config");
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_DISPLAY_DRAW_COMPOSITE)
+    {
+        this.known_unimplemented(msg.type, "Display Draw Composite");
         return true;
     }
 
