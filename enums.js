@@ -200,6 +200,8 @@ var SPICE_CHANNEL_RECORD                = 6;
 var SPICE_CHANNEL_TUNNEL                = 7;
 var SPICE_CHANNEL_SMARTCARD             = 8;
 var SPICE_CHANNEL_USBREDIR              = 9;
+var SPICE_CHANNEL_PORT                  = 10;
+var SPICE_CHANNEL_WEBDAV                = 11;
 
 var SPICE_SURFACE_FLAGS_PRIMARY = (1 << 0);
 
