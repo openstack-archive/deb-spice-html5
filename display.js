@@ -171,8 +171,6 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
                       has_alpha: this.surfaces[draw_copy.data.src_bitmap.surface_id].format == SPICE_SURFACE_FMT_32_xRGB ? false : true,
                       descriptor : draw_copy.data.src_bitmap.descriptor
                     });
-
-                return true;
             }
             else if (draw_copy.data.src_bitmap.descriptor.type == SPICE_IMAGE_TYPE_JPEG)
             {
