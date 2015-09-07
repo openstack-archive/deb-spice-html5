@@ -342,10 +342,10 @@ SpiceConn.prototype =
             {
                 rc = this.process_channel_message(msg);
                 if (! rc)
-                    this.log_warn(this.type + ": Unknown message type " + msg.type + "!");
+                    this.log_warn(this.channel_type() + ": Unknown message type " + msg.type + "!");
             }
             else
-                this.log_err(this.type + ": No message handlers for this channel; message " + msg.type);
+                this.log_err(this.channel_type() + ": No message handlers for this channel; message " + msg.type);
         }
 
         if (this.msgs_until_ack !== undefined && this.ack_window)

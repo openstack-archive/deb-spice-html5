@@ -138,10 +138,10 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
                 this.cursor = new SpicePlaybackConn(conn);
             else
             {
-                this.log_err("Channel type " + chans.channels[i].type + " unknown.");
                 if (! ("extra_channels" in this))
                     this.extra_channels = [];
                 this.extra_channels[i] = new SpiceConn(conn);
+                this.log_err("Channel type " + this.extra_channels[i].channel_type() + " not implemented");
             }
 
         }
