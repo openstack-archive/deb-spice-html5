@@ -100,7 +100,7 @@ function hexdump_buffer(a)
 /*----------------------------------------------------------------------------
 ** Converting keycodes to AT scancodes is very hard.
 ** luckly there are some resources on the web and in the Xorg driver that help
-** us figure out what browser depenend keycodes match to what scancodes.
+** us figure out what browser dependent keycodes match to what scancodes.
 **
 ** This will most likely not work for non US keyboard and browsers other than
 ** modern Chrome and FireFox.
@@ -155,7 +155,7 @@ common_scanmap[121]                = KEY_F10;
 common_scanmap[122]                = KEY_F11;
 common_scanmap[123]                = KEY_F12;
 
-/* These externded scancodes do not line up with values from atKeynames */
+/* These extended scancodes do not line up with values from atKeynames */
 common_scanmap[42]                 = 99;
 common_scanmap[19]                 = 101;    // Break
 common_scanmap[111]                = 0xE035; // KP_Divide
