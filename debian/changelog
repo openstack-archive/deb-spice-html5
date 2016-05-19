@@ -1,5 +1,6 @@
-spice-html5 (0.1.4-2) UNRELEASED; urgency=medium
+spice-html5 (0.1.6-1) UNRELEASED; urgency=medium
 
+  * New upstream release (Closes: #815156)
   * Fixed VCS URLs (https).
 
  -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:57:51 +0100
