@@ -446,8 +446,9 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
             /* This .save() is done entirely to enable SPICE_MSG_DISPLAY_RESET */
             canvas.context.save();
             document.getElementById(this.parent.screen_id).appendChild(canvas);
-            document.getElementById(this.parent.screen_id).setAttribute('width', m.surface.width);
-            document.getElementById(this.parent.screen_id).setAttribute('height', m.surface.height);
+
+            /* We're going to leave width dynamic, but correctly set the height */
+            document.getElementById(this.parent.screen_id).style.height = m.surface.height + "px";
             this.hook_events();
         }
         return true;
@@ -690,7 +691,7 @@ SpiceDisplayConn.prototype.hook_events = function()
         canvas.addEventListener('keyup', handle_keyup);
         canvas.addEventListener('mouseout', handle_mouseout);
         canvas.addEventListener('mouseover', handle_mouseover);
-        canvas.addEventListener('mousewheel', handle_mousewheel);
+        canvas.addEventListener('wheel', handle_mousewheel);
         canvas.focus();
     }
 }
@@ -708,7 +709,7 @@ SpiceDisplayConn.prototype.unhook_events = function()
         canvas.removeEventListener('keyup', handle_keyup);
         canvas.removeEventListener('mouseout', handle_mouseout);
         canvas.removeEventListener('mouseover', handle_mouseover);
-        canvas.removeEventListener('mousewheel', handle_mousewheel);
+        canvas.removeEventListener('wheel', handle_mousewheel);
     }
 }
 

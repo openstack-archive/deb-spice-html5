@@ -63,7 +63,10 @@ function hexdump_buffer(a)
             hex += "0";
         hex += h + " ";
 
-        str += String.fromCharCode(mg[i]);
+        if (mg[i] == 10 || mg[i] == 13 || mg[i] == 8)
+            str += ".";
+        else
+            str += String.fromCharCode(mg[i]);
 
         if ((i % 16 == 15) || (i == (mg.length - 1)))
         {

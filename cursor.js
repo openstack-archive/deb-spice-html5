@@ -80,6 +80,20 @@ SpiceCursorConn.prototype.process_channel_message = function(msg)
         return true;
     }
 
+    if (msg.type == SPICE_MSG_CURSOR_RESET)
+    {
+        DEBUG > 1 && console.log("SpiceMsgCursorReset");
+        document.getElementById(this.parent.screen_id).style.cursor = "auto";
+        return true;
+    }
+
+    if (msg.type == SPICE_MSG_CURSOR_INVAL_ALL)
+    {
+        DEBUG > 1 && console.log("SpiceMsgCursorInvalAll");
+        // FIXME - There may be something useful to do here...
+        return true;
+    }
+
     return false;
 }
 

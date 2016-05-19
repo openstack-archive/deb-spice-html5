@@ -57,6 +57,8 @@ function SpiceConn(o)
         this.onerror = o.onerror;
     if (o.onsuccess !== undefined)
         this.onsuccess = o.onsuccess;
+    if (o.onagent !== undefined)
+        this.onagent = o.onagent;
 
     this.state = "connecting";
     this.ws.parent = this;
@@ -76,7 +78,9 @@ function SpiceConn(o)
         this.parent.state = "start";
     });
     this.ws.addEventListener('error', function(e) {
-        this.parent.log_err(">> WebSockets.onerror" + e.toString());
+        if ('url' in e.target) {
+            this.parent.log_err("WebSocket error: Can't connect to websocket on URL: " + e.target.url);
+        }
         this.parent.report_error(e);
     });
     this.ws.addEventListener('close', function(e) {
@@ -119,6 +123,15 @@ SpiceConn.prototype =
         msg.common_caps.push(
             (1 << SPICE_COMMON_CAP_PROTOCOL_AUTH_SELECTION) |
             (1 << SPICE_COMMON_CAP_MINI_HEADER)
+            );
+
+        if (msg.channel_type == SPICE_CHANNEL_PLAYBACK)
+            msg.channel_caps.push(
+                (1 << SPICE_PLAYBACK_CAP_OPUS)
+            );
+        else if (msg.channel_type == SPICE_CHANNEL_MAIN)
+            msg.channel_caps.push(
+                (1 << SPICE_MAIN_CAP_AGENT_CONNECTED_TOKENS)
             );
 
         hdr.size = msg.buffer_size();

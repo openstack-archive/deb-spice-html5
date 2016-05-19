@@ -44,6 +44,8 @@
         <script src="display.js"></script> 
         <script src="main.js"></script> 
         <script src="inputs.js"></script> 
+        <script src="webm.js"></script>
+        <script src="playback.js"></script>
         <script src="simulatecursor.js"></script>
         <script src="cursor.js"></script> 
         <script src="thirdparty/jsbn.js"></script>
@@ -52,6 +54,8 @@
         <script src="thirdparty/rng.js"></script>
         <script src="thirdparty/sha1.js"></script>
         <script src="ticket.js"></script>
+        <script src="resize.js"></script>
+        <script src="filexfer.js"></script>
         <link rel="stylesheet" type="text/css" href="spice.css" />
 
         <script>
@@ -89,7 +93,7 @@
                 try
                 {
                     sc = new SpiceMainConn({uri: uri, screen_id: "spice-screen", dump_id: "debug-div", 
-                                message_id: "message-div", password: password, onerror: spice_error });
+                                message_id: "message-div", password: password, onerror: spice_error, onagent: agent_connected });
                 }
                 catch (e)
                 {
@@ -107,8 +111,37 @@
                 }
                 document.getElementById('connectButton').innerHTML = "Start";
                 document.getElementById('connectButton').onclick = connect;
+                if (window.File && window.FileReader && window.FileList && window.Blob)
+                {
+                    var spice_xfer_area = document.getElementById('spice-xfer-area');
+                    document.getElementById('spice-area').removeChild(spice_xfer_area);
+                    document.getElementById('spice-area').removeEventListener('dragover', handle_file_dragover, false);
+                    document.getElementById('spice-area').removeEventListener('drop', handle_file_drop, false);
+                }
                 console.log("<< disconnect");
             }
+
+            function agent_connected(sc)
+            {
+                window.addEventListener('resize', handle_resize);
+                window.spice_connection = this;
+
+                resize_helper(this);
+
+                if (window.File && window.FileReader && window.FileList && window.Blob)
+                {
+                    var spice_xfer_area = document.createElement("div");
+                    spice_xfer_area.setAttribute('id', 'spice-xfer-area');
+                    document.getElementById('spice-area').appendChild(spice_xfer_area);
+                    document.getElementById('spice-area').addEventListener('dragover', handle_file_dragover, false);
+                    document.getElementById('spice-area').addEventListener('drop', handle_file_drop, false);
+                }
+                else
+                {
+                    console.log("File API is not supported");
+                }
+            }
+
         </script>
 
     </head>
