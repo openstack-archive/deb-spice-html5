@@ -1,12 +1,13 @@
-spice-html5 (0.1.6-1) UNRELEASED; urgency=medium
+spice-html5 (0.1.6-1) unstable; urgency=medium
 
+  * Team upload.
   * New upstream release (Closes: #815156)
   * Fixed VCS URLs (https).
   * d/copyright: Reordered
   * Standards-Version is 3.9.8 now (no changes needed)
   * Changed UPSTREAM_GIT protocol to https
 
- -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:57:51 +0100
+ -- Ondřej Nový <novy@ondrej.org>  Thu, 19 May 2016 22:04:04 +0200
 
 spice-html5 (0.1.4-1) unstable; urgency=low
 
