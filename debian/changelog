@@ -3,6 +3,7 @@ spice-html5 (0.1.6-1) UNRELEASED; urgency=medium
   * New upstream release (Closes: #815156)
   * Fixed VCS URLs (https).
   * d/copyright: Reordered
+  * Standards-Version is 3.9.8 now (no changes needed)
 
  -- Ondřej Nový <novy@ondrej.org>  Sun, 28 Feb 2016 15:57:51 +0100
 

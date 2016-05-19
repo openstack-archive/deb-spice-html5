@@ -7,7 +7,7 @@ Uploaders: Julien Danjou <acid@debian.org>,
            Mehdi Abaakouk <sileht@sileht.net>,
            Liang Guo <guoliang@debian.org>
 Build-Depends: debhelper (>= 9), openstack-pkg-tools
-Standards-Version: 3.9.4
+Standards-Version: 3.9.8
 Vcs-Browser: https://anonscm.debian.org/cgit/openstack/spice-html5.git/
 Vcs-Git: https://anonscm.debian.org/git/openstack/spice-html5.git
 Homepage: http://www.spice-space.org/page/Html5
