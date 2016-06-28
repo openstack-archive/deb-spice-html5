@@ -186,10 +186,13 @@ SpicePlaybackConn.prototype.start_playback = function(data)
     this.start_time = data.time;
 
     var h = new webm_Header();
+    var te = new webm_AudioTrackEntry;
+    var t = new webm_Tracks(te);
 
-    var mb = new ArrayBuffer(h.buffer_size())
+    var mb = new ArrayBuffer(h.buffer_size() + t.buffer_size())
 
     this.bytes_written = h.to_buffer(mb);
+    this.bytes_written = t.to_buffer(mb, this.bytes_written);
 
     this.source_buffer.addEventListener('error', handle_sourcebuffer_error, false);
     this.source_buffer.addEventListener('updateend', handle_append_buffer_done, false);

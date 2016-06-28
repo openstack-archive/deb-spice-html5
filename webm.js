@@ -356,7 +356,7 @@ webm_SeekHead.prototype =
    End of Seek Head
 */
 
-function webm_TrackEntry()
+function webm_AudioTrackEntry()
 {
     this.id = WEBM_TRACK_ENTRY;
     this.number = 1;
@@ -385,7 +385,7 @@ function webm_TrackEntry()
                            ];
 }
 
-webm_TrackEntry.prototype =
+webm_AudioTrackEntry.prototype =
 {
     to_buffer: function(a, at)
     {
@@ -526,9 +526,6 @@ function webm_Header()
     this.info = new webm_SegmentInformation;
 
     this.seek_head.track.pos = this.seek_head.info.pos + this.info.buffer_size();
-
-    this.track_entry = new webm_TrackEntry;
-    this.tracks = new webm_Tracks(this.track_entry);
 }
 
 webm_Header.prototype =
@@ -539,7 +536,6 @@ webm_Header.prototype =
         at = this.ebml.to_buffer(a, at);
         at = this.segment.to_buffer(a, at);
         at = this.info.to_buffer(a, at);
-        at = this.tracks.to_buffer(a, at);
 
         return at;
     },
@@ -547,7 +543,6 @@ webm_Header.prototype =
     {
         return this.ebml.buffer_size() +
                this.segment.buffer_size() +
-               this.info.buffer_size() +
-               this.tracks.buffer_size();
+               this.info.buffer_size();
     },
 }
