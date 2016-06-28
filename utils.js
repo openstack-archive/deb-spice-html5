@@ -23,6 +23,7 @@
 **--------------------------------------------------------------------------*/
 var DEBUG = 0;
 var PLAYBACK_DEBUG = 0;
+var STREAM_DEBUG = 0;
 var DUMP_DRAWS = false;
 var DUMP_CANVASES = false;
 
