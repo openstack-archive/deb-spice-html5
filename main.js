@@ -478,3 +478,9 @@ SpiceMainConn.prototype.handle_mouse_mode = function(current, supported)
         this.inputs.mouse_mode = current;
 }
 
+/* Shift current time to attempt to get a time matching that of the server */
+SpiceMainConn.prototype.relative_now = function()
+{
+    var ret = (Date.now() - this.our_mm_time) + this.mm_time;
+    return ret;
+}

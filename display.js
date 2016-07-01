@@ -594,17 +594,13 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
             return false;
         }
 
-        var mmtime = (Date.now() - this.parent.our_mm_time) + this.parent.mm_time;
-        var latency = m.base.multi_media_time - mmtime;
+        var time_until_due = m.base.multi_media_time - this.parent.relative_now();
 
         if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_MJPEG)
-            process_mjpeg_stream_data(this, m, latency);
+            process_mjpeg_stream_data(this, m, time_until_due);
 
         if (this.streams[m.base.id].codec_type === SPICE_VIDEO_CODEC_TYPE_VP8)
             process_video_stream_data(this.streams[m.base.id], m);
-
-        if ("report" in this.streams[m.base.id])
-            process_stream_data_report(this, m, mmtime, latency);
 
         return true;
     }
@@ -958,11 +954,14 @@ function handle_draw_jpeg_onload()
 
         this.o.sc.surfaces[this.o.base.surface_id].draw_count++;
     }
+
+    if ("report" in this.o.sc.streams[this.o.id])
+            process_stream_data_report(this.o.sc, this.o.id, this.o.msg_mmtime, this.o.msg_mmtime - this.o.sc.parent.relative_now())
 }
 
-function process_mjpeg_stream_data(sc, m, latency)
+function process_mjpeg_stream_data(sc, m, time_until_due)
 {
-    if (latency < 0)
+    if (time_until_due < 0)
     {
         if ("report" in sc.streams[m.base.id])
             sc.streams[m.base.id].report.num_drops++;
@@ -988,30 +987,32 @@ function process_mjpeg_stream_data(sc, m, latency)
           tag: "mjpeg." + m.base.id,
           descriptor: null,
           sc : sc,
+          id : m.base.id,
+          msg_mmtime : m.base.multi_media_time,
         };
     img.onload = handle_draw_jpeg_onload;
     img.src = tmpstr;
 }
 
-function process_stream_data_report(sc, m, mmtime, latency)
+function process_stream_data_report(sc, id, msg_mmtime, time_until_due)
 {
-    sc.streams[m.base.id].report.num_frames++;
-    if (sc.streams[m.base.id].report.start_frame_mm_time == 0)
-        sc.streams[m.base.id].report.start_frame_mm_time = m.base.multi_media_time;
+    sc.streams[id].report.num_frames++;
+    if (sc.streams[id].report.start_frame_mm_time == 0)
+        sc.streams[id].report.start_frame_mm_time = msg_mmtime;
 
-    if (sc.streams[m.base.id].report.num_frames > sc.streams[m.base.id].max_window_size ||
-        (m.base.multi_media_time - sc.streams[m.base.id].report.start_frame_mm_time) > sc.streams[m.base.id].timeout_ms)
+    if (sc.streams[id].report.num_frames > sc.streams[id].max_window_size ||
+        (msg_mmtime - sc.streams[id].report.start_frame_mm_time) > sc.streams[id].timeout_ms)
     {
-        sc.streams[m.base.id].report.end_frame_mm_time = m.base.multi_media_time;
-        sc.streams[m.base.id].report.last_frame_delay = latency;
+        sc.streams[id].report.end_frame_mm_time = msg_mmtime;
+        sc.streams[id].report.last_frame_delay = time_until_due;
 
         var msg = new SpiceMiniData();
-        msg.build_msg(SPICE_MSGC_DISPLAY_STREAM_REPORT, sc.streams[m.base.id].report);
+        msg.build_msg(SPICE_MSGC_DISPLAY_STREAM_REPORT, sc.streams[id].report);
         sc.send_msg(msg);
 
-        sc.streams[m.base.id].report.start_frame_mm_time = 0;
-        sc.streams[m.base.id].report.num_frames = 0;
-        sc.streams[m.base.id].report.num_drops = 0;
+        sc.streams[id].report.start_frame_mm_time = 0;
+        sc.streams[id].report.num_frames = 0;
+        sc.streams[id].report.num_drops = 0;
     }
 }
 
@@ -1085,10 +1086,17 @@ function handle_append_video_buffer_done(e)
 {
     var stream = this.stream;
 
+    if (stream.current_frame && "report" in stream)
+    {
+        var sc = this.stream.media.spiceconn;
+        var t = this.stream.current_frame.msg_mmtime;
+        process_stream_data_report(sc, stream.id, t, t - sc.parent.relative_now());
+    }
+
     if (stream.queue.length > 0)
     {
-        var mb = stream.queue.shift();
-        append_video_buffer(stream.source_buffer, mb);
+        stream.current_frame = stream.queue.shift();
+        append_video_buffer(stream.source_buffer, stream.current_frame.mb);
     }
     else
     {
@@ -1102,16 +1110,32 @@ function handle_video_buffer_error(e)
     p.log_err('source_buffer error ' + e.message);
 }
 
+function push_or_queue(stream, msg, mb)
+{
+    var frame =
+    {
+        msg_mmtime : msg.base.multi_media_time,
+    };
+
+    if (stream.append_okay)
+    {
+        stream.current_frame = frame;
+        append_video_buffer(stream.source_buffer, mb);
+    }
+    else
+    {
+        frame.mb = mb;
+        stream.queue.push(frame);
+    }
+}
+
 function video_simple_block(stream, msg, keyframe)
 {
     var simple = new webm_SimpleBlock(msg.base.multi_media_time - stream.cluster_time, msg.data, keyframe);
     var mb = new ArrayBuffer(simple.buffer_size());
     simple.to_buffer(mb);
 
-    if (stream.append_okay)
-        append_video_buffer(stream.source_buffer, mb);
-    else
-        stream.queue.push(mb);
+    push_or_queue(stream, msg, mb);
 }
 
 function new_video_cluster(stream, msg)
@@ -1122,10 +1146,7 @@ function new_video_cluster(stream, msg)
     var mb = new ArrayBuffer(c.buffer_size());
     c.to_buffer(mb);
 
-    if (stream.append_okay)
-        append_video_buffer(stream.source_buffer, mb);
-    else
-        stream.queue.push(mb);
+    push_or_queue(stream, msg, mb);
 
     video_simple_block(stream, msg, true);
 }
