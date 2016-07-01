@@ -46,7 +46,7 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
     {
         var start = new SpiceMsgPlaybackStart(msg.data);
 
-        DEBUG > 0 && console.log("PlaybackStart; frequency " + start.frequency);
+        PLAYBACK_DEBUG > 0 && console.log("PlaybackStart; frequency " + start.frequency);
 
         if (start.frequency != OPUS_FREQUENCY)
         {
@@ -95,7 +95,7 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
         {
             // FIXME - this is arguably wrong.  But delaying the transmission was worse,
             //          in initial testing.  Could use more research.
-            DEBUG > 1 && console.log("Hacking time of " + data.time + " to " + this.last_data_time + 1);
+            PLAYBACK_DEBUG > 1 && console.log("Hacking time of " + data.time + " to " + this.last_data_time + 1);
             data.time = this.last_data_time + 1;
         }
 
@@ -117,7 +117,7 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
         this.last_data_time = data.time;
 
 
-        DEBUG > 1 && console.log("PlaybackData; time " + data.time + "; length " + data.data.byteLength);
+        PLAYBACK_DEBUG > 1 && console.log("PlaybackData; time " + data.time + "; length " + data.data.byteLength);
 
         if (! this.source_buffer)
             return true;
