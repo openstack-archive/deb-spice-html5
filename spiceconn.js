@@ -334,6 +334,7 @@ SpiceConn.prototype =
     process_message: function(msg)
     {
         var rc;
+        var start = Date.now();
         DEBUG > 0 && console.log("<< hdr " + this.channel_type() + " type " + msg.type + " size " + (msg.data && msg.data.byteLength));
         rc = this.process_common_messages(msg);
         if (! rc)
@@ -361,6 +362,9 @@ SpiceConn.prototype =
             }
         }
 
+        var delta = Date.now() - start;
+        if (DEBUG > 0 || delta > GAP_DETECTION_THRESHOLD)
+            console.log("delta " + this.channel_type() + ":" + msg.type + " " + delta);
         return rc;
     },
 
