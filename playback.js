@@ -72,6 +72,7 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
             this.media_source.spiceconn = this;
 
             this.audio = document.createElement("audio");
+            this.audio.spiceconn = this;
             this.audio.setAttribute('autoplay', true);
             this.audio.src = window.URL.createObjectURL(this.media_source);
             document.getElementById(this.parent.screen_id).appendChild(this.audio);
@@ -240,6 +241,12 @@ function handle_source_open(e)
         p.log_err('Codec ' + SPICE_PLAYBACK_CODEC + ' not available.');
         return;
     }
+
+    if (PLAYBACK_DEBUG > 0)
+        playback_handle_event_debug.call(this, e);
+
+    listen_for_audio_events(p);
+
     p.source_buffer.spiceconn = p;
     p.source_buffer.mode = "segments";
 
@@ -263,9 +270,13 @@ function handle_source_closed(e)
     p.log_err('Audio source unexpectedly closed.');
 }
 
-function handle_append_buffer_done(b)
+function handle_append_buffer_done(e)
 {
     var p = this.spiceconn;
+
+    if (PLAYBACK_DEBUG > 1)
+        playback_handle_event_debug.call(this, e);
+
     if (p.queue.length > 0)
     {
         var mb = p.queue.shift();
@@ -293,4 +304,54 @@ function playback_append_buffer(p, b)
     {
         p.log_err("Error invoking appendBuffer: " + e.message);
     }
+}
+
+function playback_handle_event_debug(e)
+{
+    var p = this.spiceconn;
+    if (p.audio)
+    {
+        if (PLAYBACK_DEBUG > 0 || p.audio.buffered.len > 1)
+            console.log(p.audio.currentTime + ": event " + e.type +
+                dump_media_element(p.audio));
+    }
+
+    if (PLAYBACK_DEBUG > 1 && p.media_source)
+        console.log("  media_source " + dump_media_source(p.media_source));
+
+    if (PLAYBACK_DEBUG > 1 && p.source_buffer)
+        console.log("  source_buffer " + dump_source_buffer(p.source_buffer));
+
+    if (PLAYBACK_DEBUG > 0 || p.queue.length > 1)
+        console.log('  queue len ' + p.queue.length + '; append_okay: ' + p.append_okay);
+}
+
+function playback_debug_listen_for_one_event(name)
+{
+    this.addEventListener(name, playback_handle_event_debug);
+}
+
+function listen_for_audio_events(spiceconn)
+{
+    var audio_0_events = [
+        "abort", "error"
+    ];
+
+    var audio_1_events = [
+        "loadstart", "suspend", "emptied", "stalled", "loadedmetadata", "loadeddata", "canplay",
+        "canplaythrough", "playing", "waiting", "seeking", "seeked", "ended", "durationchange",
+        "timeupdate", "play", "pause", "ratechange"
+    ];
+
+    var audio_2_events = [
+        "progress",
+        "resize",
+        "volumechange"
+    ];
+
+    audio_0_events.forEach(playback_debug_listen_for_one_event, spiceconn.audio);
+    if (PLAYBACK_DEBUG > 0)
+        audio_1_events.forEach(playback_debug_listen_for_one_event, spiceconn.audio);
+    if (PLAYBACK_DEBUG > 1)
+        audio_2_events.forEach(playback_debug_listen_for_one_event, spiceconn.audio);
 }
