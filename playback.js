@@ -100,6 +100,9 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
             data.time = this.last_data_time + 1;
         }
 
+        if (! this.source_buffer)
+            return true;
+
         /* Gap detection:  If there has been a delay since our last packet, then audio must
              have paused.  Handling that gets tricky.  In Chrome, you can seek forward,
              but you cannot in Firefox.  And seeking forward in Chrome is nice, as it keeps
@@ -119,9 +122,6 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
 
 
         PLAYBACK_DEBUG > 1 && console.log("PlaybackData; time " + data.time + "; length " + data.data.byteLength);
-
-        if (! this.source_buffer)
-            return true;
 
         if (this.start_time == 0)
             this.start_playback(data);
