@@ -1,5 +1,7 @@
 Medium Tasks:
 
+  . Support lz4
+
   . Get the mouse event code out of spicemsg (and make spicemsg
     *only* about messages)
 
@@ -29,7 +31,8 @@ Big Tasks:
   . Generate messages + enums from spice.proto
 
   . Video:
-    - Need to pick a video codec and get support for it into spice server
+    - Need to add more video codecs and attempt to refine video
+      behavior
 
   . Explore clipboard
     - Supporting it may require unpleasant hacks
@@ -39,8 +42,6 @@ Big Tasks:
 
   . Fix the many limitations of Draw operation support (clipping, masking,
     scaling, and so on)
-
-  . Implement direct websocket support for the spice server
 
   . Profile the whole mess
     - Initial profiling suggests image decompression is the big hog

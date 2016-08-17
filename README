@@ -1,6 +1,6 @@
 Spice Javascript client
 
-Instructions and status as of March, 2015.
+Instructions and status as of August, 2016.
 
 Requirements:
 
@@ -8,15 +8,16 @@ Requirements:
       
   2.  A WebSocket proxy
 
-      I've used websockify:
+      websockify:
         https://github.com/kanaka/websockify
       works great.
 
+      Note that a patch to remove this requirement has been submitted
+      to the Spice project but not yet been accepted.  Refer to this email:
+      https://lists.freedesktop.org/archives/spice-devel/2016-June/030552.html
+
   3.  A spice server
 
-      At this point, I've tested with qemu hosting
-      a Fedora image, a Vista image, and with Xspice.  
-      Vista was pretty bad; I recommend either Linux or Xspice.
 
 Optional:
   1.  A web server
