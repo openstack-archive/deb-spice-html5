@@ -119,7 +119,8 @@ SpiceConn.prototype =
 
         msg.connection_id = this.connection_id;
         msg.channel_type = this.type;
-        // FIXME - we're not setting a channel_id...
+        msg.channel_id = this.chan_id;
+
         msg.common_caps.push(
             (1 << SPICE_COMMON_CAP_PROTOCOL_AUTH_SELECTION) |
             (1 << SPICE_COMMON_CAP_MINI_HEADER)
