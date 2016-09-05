@@ -23,7 +23,7 @@
 **      This is the base Javascript class for establishing and
 **  managing a connection to a Spice Server.
 **  It is used to provide core functionality to the Spice main,
-**  display, inputs, and cursor channels.  See main.js for 
+**  display, inputs, and cursor channels.  See main.js for
 **  usage.
 **--------------------------------------------------------------------------*/
 function SpiceConn(o)
@@ -189,8 +189,8 @@ SpiceConn.prototype =
 
                 if (msg.type > 500)
                 {
-                    alert("Something has gone very wrong; we think we have message of type " + msg.type);
-                    debugger;
+                    DEBUG > 0 && alert("Something has gone very wrong; we think we have message of type " + msg.type);
+                    DEBUG > 0 && debugger;
                 }
 
                 if (msg.size == 0)
