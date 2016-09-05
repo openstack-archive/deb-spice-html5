@@ -1,0 +1,8 @@
+Code-Review+2: Thomas Goirand <thomas@goirand.fr>
+Workflow+1: Thomas Goirand <thomas@goirand.fr>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Mon, 05 Sep 2016 12:54:06 +0000
+Reviewed-on: https://review.openstack.org/348435
+Project: openstack/deb-spice-html5
+Branch: refs/heads/debian/unstable
