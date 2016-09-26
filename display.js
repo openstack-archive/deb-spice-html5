@@ -535,7 +535,10 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
     if (msg.type == SPICE_MSG_DISPLAY_STREAM_CREATE)
     {
         var m = new SpiceMsgDisplayStreamCreate(msg.data);
-        DEBUG > 1 && console.log(this.type + ": MsgStreamCreate id" + m.id);
+        STREAM_DEBUG > 1 && console.log(this.type + ": MsgStreamCreate id" + m.id +
+                                        "; width " + m.stream_width + "; height " + m.stream_height +
+                                        "; left " + m.dest.left + "; top " + m.dest.top
+                                        );
         if (!this.streams)
             this.streams = new Array();
         if (this.streams[m.id])
@@ -628,7 +631,7 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
     if (msg.type == SPICE_MSG_DISPLAY_STREAM_CLIP)
     {
         var m = new SpiceMsgDisplayStreamClip(msg.data);
-        DEBUG > 1 && console.log(this.type + ": MsgStreamClip id" + m.id);
+        STREAM_DEBUG > 1 && console.log(this.type + ": MsgStreamClip id" + m.id);
         this.streams[m.id].clip = m.clip;
         return true;
     }
@@ -636,7 +639,7 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
     if (msg.type == SPICE_MSG_DISPLAY_STREAM_DESTROY)
     {
         var m = new SpiceMsgDisplayStreamDestroy(msg.data);
-        DEBUG > 1 && console.log(this.type + ": MsgStreamDestroy id" + m.id);
+        STREAM_DEBUG > 1 && console.log(this.type + ": MsgStreamDestroy id" + m.id);
 
         if (this.streams[m.id].codec_type == SPICE_VIDEO_CODEC_TYPE_VP8)
         {
