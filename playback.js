@@ -29,8 +29,6 @@ function SpicePlaybackConn()
     this.queue = new Array();
     this.append_okay = false;
     this.start_time = 0;
-    this.skip_until = 0;
-    this.gap_time = 0;
 }
 
 SpicePlaybackConn.prototype = Object.create(SpiceConn.prototype);
@@ -103,19 +101,13 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
         if (! this.source_buffer)
             return true;
 
-        /* Gap detection:  If there has been a delay since our last packet, then audio must
-             have paused.  Handling that gets tricky.  In Chrome, you can seek forward,
-             but you cannot in Firefox.  And seeking forward in Chrome is nice, as it keeps
-             Chrome from being overly cautious in it's buffer strategy.
-
-             So we do two things.  First, we seek forward.  Second, we compute how much of a gap
-             there would have been, and essentially eliminate it.
-        */
-        if (this.last_data_time && data.time >= (this.last_data_time + GAP_DETECTION_THRESHOLD))
+        if (this.audio.readyState >= 3 && this.audio.buffered.length > 1 &&
+            this.audio.currentTime == this.audio.buffered.end(0) &&
+            this.audio.currentTime < this.audio.buffered.start(this.audio.buffered.length - 1))
         {
-            this.skip_until = data.time;
-            this.gap_time = (data.time - this.start_time) -
-              (this.source_buffer.buffered.end(this.source_buffer.buffered.end.length - 1) * 1000.0).toFixed(0);
+            console.log("Audio underrun: we appear to have fallen behind; advancing to " +
+                this.audio.buffered.start(this.audio.buffered.length - 1));
+            this.audio.currentTime = this.audio.buffered.start(this.audio.buffered.length - 1);
         }
 
         this.last_data_time = data.time;
@@ -126,17 +118,11 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
         if (this.start_time == 0)
             this.start_playback(data);
 
-        else if (data.time - this.cluster_time >= MAX_CLUSTER_TIME || this.skip_until > 0)
+        else if (data.time - this.cluster_time >= MAX_CLUSTER_TIME)
             this.new_cluster(data);
 
         else
             this.simple_block(data, false);
-
-        if (this.skip_until > 0)
-        {
-            this.audio.currentTime = (this.skip_until - this.start_time - this.gap_time) / 1000.0;
-            this.skip_until = 0;
-        }
 
         if (this.audio.paused)
             this.audio.play();
@@ -205,7 +191,7 @@ SpicePlaybackConn.prototype.new_cluster = function(data)
 {
     this.cluster_time = data.time;
 
-    var c = new webm_Cluster(data.time - this.start_time - this.gap_time);
+    var c = new webm_Cluster(data.time - this.start_time);
 
     var mb = new ArrayBuffer(c.buffer_size());
     this.bytes_written += c.to_buffer(mb);
