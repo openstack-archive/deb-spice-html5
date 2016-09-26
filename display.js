@@ -567,12 +567,17 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
             media.addEventListener('sourceended', handle_video_source_ended, false);
             media.addEventListener('sourceclosed', handle_video_source_closed, false);
 
-            this.streams[m.id].video = v;
-            this.streams[m.id].media = media;
+            var s = this.streams[m.id];
+            s.video = v;
+            s.media = media;
+            s.queue = new Array();
+            s.start_time = 0;
+            s.cluster_time = 0;
+            s.append_okay = false;
 
-            media.stream = this.streams[m.id];
+            media.stream = s;
             media.spiceconn = this;
-            v.spice_stream = this.streams[m.id];
+            v.spice_stream = s;
         }
         else if (m.codec_type != SPICE_VIDEO_CODEC_TYPE_MJPEG)
             console.log("Unhandled stream codec: "+m.codec_type);
@@ -1035,10 +1040,6 @@ function handle_video_source_open(e)
     s.spiceconn = p;
     s.stream = stream;
 
-    stream.queue = new Array();
-    stream.start_time = 0;
-    stream.cluster_time = 0;
-
     listen_for_video_events(stream);
 
     var h = new webm_Header();
@@ -1153,13 +1154,9 @@ function new_video_cluster(stream, msg)
 
 function process_video_stream_data(stream, msg)
 {
-    if (! stream.source_buffer)
-        return true;
-
     if (stream.start_time == 0)
     {
         stream.start_time = msg.base.multi_media_time;
-        stream.video.play();
         new_video_cluster(stream, msg);
     }
 
