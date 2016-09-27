@@ -28,26 +28,26 @@
     <head>
 
         <title>Spice Javascript client</title>
-        <script src="spicearraybuffer.js"></script> 
-        <script src="enums.js"></script> 
-        <script src="atKeynames.js"></script> 
-        <script src="utils.js"></script> 
-        <script src="png.js"></script> 
-        <script src="lz.js"></script> 
-        <script src="quic.js"></script> 
-        <script src="bitmap.js"></script> 
-        <script src="spicedataview.js"></script> 
-        <script src="spicetype.js"></script> 
-        <script src="spicemsg.js"></script> 
-        <script src="wire.js"></script> 
-        <script src="spiceconn.js"></script> 
-        <script src="display.js"></script> 
-        <script src="main.js"></script> 
-        <script src="inputs.js"></script> 
+        <script src="spicearraybuffer.js"></script>
+        <script src="enums.js"></script>
+        <script src="atKeynames.js"></script>
+        <script src="utils.js"></script>
+        <script src="png.js"></script>
+        <script src="lz.js"></script>
+        <script src="quic.js"></script>
+        <script src="bitmap.js"></script>
+        <script src="spicedataview.js"></script>
+        <script src="spicetype.js"></script>
+        <script src="spicemsg.js"></script>
+        <script src="wire.js"></script>
+        <script src="spiceconn.js"></script>
+        <script src="display.js"></script>
+        <script src="main.js"></script>
+        <script src="inputs.js"></script>
         <script src="webm.js"></script>
         <script src="playback.js"></script>
         <script src="simulatecursor.js"></script>
-        <script src="cursor.js"></script> 
+        <script src="cursor.js"></script>
         <script src="thirdparty/jsbn.js"></script>
         <script src="thirdparty/rsa.js"></script>
         <script src="thirdparty/prng4.js"></script>
@@ -71,8 +71,8 @@
             {
                 var host, port, password, scheme = "ws://", uri;
 
-                host = document.getElementById("host").value; 
-                port = document.getElementById("port").value; 
+                host = document.getElementById("host").value;
+                port = document.getElementById("port").value;
                 password = document.getElementById("password").value;
 
 
@@ -92,7 +92,7 @@
 
                 try
                 {
-                    sc = new SpiceMainConn({uri: uri, screen_id: "spice-screen", dump_id: "debug-div", 
+                    sc = new SpiceMainConn({uri: uri, screen_id: "spice-screen", dump_id: "debug-div",
                                 message_id: "message-div", password: password, onerror: spice_error, onagent: agent_connected });
                 }
                 catch (e)

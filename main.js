@@ -22,7 +22,7 @@
 **  SpiceMainConn
 **      This is the master Javascript class for establishing and
 **  managing a connection to a Spice Server.
-**  
+**
 **      Invocation:  You must pass an object with properties as follows:
 **          uri         (required)  Uri of a WebSocket listener that is
 **                                  connected to a spice server.

@@ -5,7 +5,7 @@ Instructions and status as of August, 2016.
 Requirements:
 
   1.  Modern Firefox or Chrome (IE will work, but badly)
-      
+
   2.  A WebSocket proxy
 
       websockify:
@@ -24,7 +24,7 @@ Optional:
 
       With firefox, you can just open file:///your-path-to-spice.html-here
 
-      With Chrome, you have to set a secret config flag to do that, or 
+      With Chrome, you have to set a secret config flag to do that, or
       serve the files from a web server.
 
 

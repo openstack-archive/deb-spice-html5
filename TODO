@@ -6,7 +6,7 @@ Medium Tasks:
     *only* about messages)
 
   . Change the message processing to be able to handle
-    an array of ArrayBuffers so we don't have to 
+    an array of ArrayBuffers so we don't have to
     use the combine function, which is presumed slow.
 
   . Use the 'real' DataView if we have it
