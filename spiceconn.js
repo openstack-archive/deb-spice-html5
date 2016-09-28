@@ -127,21 +127,28 @@ SpiceConn.prototype =
             );
 
         if (msg.channel_type == SPICE_CHANNEL_PLAYBACK)
-            msg.channel_caps.push(
-                (1 << SPICE_PLAYBACK_CAP_OPUS)
-            );
+        {
+            var caps = 0;
+            if ('MediaSource' in window && MediaSource.isTypeSupported(SPICE_PLAYBACK_CODEC))
+                caps |= (1 << SPICE_PLAYBACK_CAP_OPUS);
+            msg.channel_caps.push(caps);
+        }
         else if (msg.channel_type == SPICE_CHANNEL_MAIN)
+        {
             msg.channel_caps.push(
                 (1 << SPICE_MAIN_CAP_AGENT_CONNECTED_TOKENS)
             );
+        }
         else if (msg.channel_type == SPICE_CHANNEL_DISPLAY)
-            msg.channel_caps.push(
-                (1 << SPICE_DISPLAY_CAP_SIZED_STREAM) |
-                (1 << SPICE_DISPLAY_CAP_STREAM_REPORT) |
-                (1 << SPICE_DISPLAY_CAP_MULTI_CODEC) |
-                (1 << SPICE_DISPLAY_CAP_CODEC_MJPEG) |
-                (1 << SPICE_DISPLAY_CAP_CODEC_VP8)
-            );
+        {
+            var caps =  (1 << SPICE_DISPLAY_CAP_SIZED_STREAM) |
+                        (1 << SPICE_DISPLAY_CAP_STREAM_REPORT) |
+                        (1 << SPICE_DISPLAY_CAP_MULTI_CODEC) |
+                        (1 << SPICE_DISPLAY_CAP_CODEC_MJPEG);
+            if ('MediaSource' in window && MediaSource.isTypeSupported(SPICE_VP8_CODEC))
+                caps |= (1 << SPICE_DISPLAY_CAP_CODEC_VP8);
+            msg.channel_caps.push(caps);
+        }
 
         hdr.size = msg.buffer_size();
 
