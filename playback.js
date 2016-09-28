@@ -142,9 +142,6 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
         else
             this.simple_block(data, false);
 
-        if (this.audio.paused)
-            this.audio.play();
-
         return true;
     }
 
