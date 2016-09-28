@@ -158,7 +158,22 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
 
     if (msg.type == SPICE_MSG_PLAYBACK_STOP)
     {
-        return true;
+        PLAYBACK_DEBUG > 0 && console.log("PlaybackStop");
+        if (this.source_buffer)
+        {
+            document.getElementById(this.parent.screen_id).removeChild(this.audio);
+            window.URL.revokeObjectURL(this.audio.src);
+
+            delete this.source_buffer;
+            delete this.media_source;
+            delete this.audio;
+
+            this.append_okay = false;
+            this.queue = new Array();
+            this.start_time = 0;
+
+            return true;
+        }
     }
 
     if (msg.type == SPICE_MSG_PLAYBACK_VOLUME)
