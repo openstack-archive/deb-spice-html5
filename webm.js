@@ -84,6 +84,7 @@ var OPUS_CHANNELS                           = 2;
 var SPICE_PLAYBACK_CODEC                    = 'audio/webm; codecs="opus"';
 var MAX_CLUSTER_TIME                        = 1000;
 
+var EXPECTED_PACKET_DURATION                = 10;
 var GAP_DETECTION_THRESHOLD                 = 50;
 
 var SPICE_VP8_CODEC                         = 'video/webm; codecs="vp8"';

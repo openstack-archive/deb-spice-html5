@@ -89,15 +89,6 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
     {
         var data = new SpiceMsgPlaybackData(msg.data);
 
-        // If this packet has the same time as the last, just bump up by one.
-        if (this.last_data_time && data.time <= this.last_data_time)
-        {
-            // FIXME - this is arguably wrong.  But delaying the transmission was worse,
-            //          in initial testing.  Could use more research.
-            PLAYBACK_DEBUG > 1 && console.log("Hacking time of " + data.time + " to " + this.last_data_time + 1);
-            data.time = this.last_data_time + 1;
-        }
-
         if (! this.source_buffer)
             return true;
 
@@ -110,8 +101,35 @@ SpicePlaybackConn.prototype.process_channel_message = function(msg)
             this.audio.currentTime = this.audio.buffered.start(this.audio.buffered.length - 1);
         }
 
-        this.last_data_time = data.time;
+        /* Around version 45, Firefox started being very particular about the
+           time stamps put into the Opus stream.  The time stamps from the Spice server are
+           somewhat irregular.  They mostly arrive every 10 ms, but sometimes it is 11, or sometimes
+           with two time stamps the same in a row.  The previous logic resulted in fuzzy and/or
+           distorted audio streams in Firefox in a row.
 
+           In theory, the sequence mode should be appropriate for us, but as of 09/27/2016,
+           I was unable to make sequence mode work with Firefox.
+
+           Thus, we end up with an inelegant hack.  Essentially, we force every packet to have
+           a 10ms time delta, unless there is an obvious gap in time stream, in which case we
+           will resync.
+        */
+
+        if (this.start_time != 0 && data.time != (this.last_data_time + EXPECTED_PACKET_DURATION))
+        {
+            if (Math.abs(data.time - (EXPECTED_PACKET_DURATION + this.last_data_time)) < MAX_CLUSTER_TIME)
+            {
+                PLAYBACK_DEBUG > 1 && console.log("Hacking time of " + data.time + " to " +
+                                      (this.last_data_time + EXPECTED_PACKET_DURATION));
+                data.time = this.last_data_time + EXPECTED_PACKET_DURATION;
+            }
+            else
+            {
+                PLAYBACK_DEBUG > 1 && console.log("Apparent gap in audio time; now is " + data.time + " last was " + this.last_data_time);
+            }
+        }
+
+        this.last_data_time = data.time;
 
         PLAYBACK_DEBUG > 1 && console.log("PlaybackData; time " + data.time + "; length " + data.data.byteLength);
 
