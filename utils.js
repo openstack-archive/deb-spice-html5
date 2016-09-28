@@ -27,6 +27,11 @@ var STREAM_DEBUG = 0;
 var DUMP_DRAWS = false;
 var DUMP_CANVASES = false;
 
+/*----------------------------------------------------------------------------
+**  We use an Image temporarily, and the image/src does not get garbage
+**   collected as quickly as we might like.  This blank image helps with that.
+**--------------------------------------------------------------------------*/
+var EMPTY_GIF_IMAGE = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=";
 
 /*----------------------------------------------------------------------------
 **  combine_array_buffers
