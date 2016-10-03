@@ -100,6 +100,13 @@ function hexdump_buffer(a)
 }
 
 /*----------------------------------------------------------------------------
+**  Convert arraybuffer to string
+**--------------------------------------------------------------------------*/
+function arraybuffer_to_str(buf) {
+  return String.fromCharCode.apply(null, new Uint16Array(buf));
+}
+
+/*----------------------------------------------------------------------------
 ** Converting keycodes to AT scancodes is very hard.
 ** luckly there are some resources on the web and in the Xorg driver that help
 ** us figure out what browser dependent keycodes match to what scancodes.

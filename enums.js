@@ -166,6 +166,15 @@ var SPICE_MSG_PLAYBACK_VOLUME           = 105;
 var SPICE_MSG_PLAYBACK_MUTE             = 106;
 var SPICE_MSG_PLAYBACK_LATENCY          = 107;
 
+var SPICE_MSG_SPICEVMC_DATA             = 101;
+var SPICE_MSG_PORT_INIT                 = 201;
+var SPICE_MSG_PORT_EVENT                = 202;
+var SPICE_MSG_END_PORT                  = 203;
+
+var SPICE_MSGC_SPICEVMC_DATA            = 101;
+var SPICE_MSGC_PORT_EVENT               = 201;
+var SPICE_MSGC_END_PORT                 = 202;
+
 var SPICE_PLAYBACK_CAP_CELT_0_5_1       = 0;
 var SPICE_PLAYBACK_CAP_VOLUME           = 1;
 var SPICE_PLAYBACK_CAP_LATENCY          = 2;

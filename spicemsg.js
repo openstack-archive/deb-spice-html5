@@ -1278,3 +1278,21 @@ SpiceMsgDisplayInvalList.prototype =
         }
     },
 }
+
+function SpiceMsgPortInit(a, at)
+{
+    this.from_buffer(a,at);
+};
+
+SpiceMsgPortInit.prototype =
+{
+    from_buffer: function (a, at)
+    {
+        at = at || 0;
+        var dv = new SpiceDataView(a);
+        var namesize = dv.getUint32(at, true); at += 4;
+        var offset = dv.getUint32(at, true); at += 4;
+        this.opened = dv.getUint8(at, true); at += 1;
+        this.name = a.slice(offset, offset + namesize - 1);
+    }
+}

@@ -42,6 +42,7 @@
         <script src="wire.js"></script>
         <script src="spiceconn.js"></script>
         <script src="display.js"></script>
+        <script src="port.js"></script>
         <script src="main.js"></script>
         <script src="inputs.js"></script>
         <script src="webm.js"></script>
@@ -181,6 +182,18 @@
                     console.log("File API is not supported");
                 }
             }
+
+            /* SPICE port event listeners
+            window.addEventListener('spice-port-data', function(event) {
+                // Here we convert data to text, but really we can obtain binary data also
+                var msg_text = arraybuffer_to_str(new Uint8Array(event.detail.data));
+                DEBUG > 0 && console.log('SPICE port', event.detail.channel.portName, 'message text:', msg_text);
+            });
+
+            window.addEventListener('spice-port-event', function(event) {
+                DEBUG > 0 && console.log('SPICE port', event.detail.channel.portName, 'event data:', event.detail.spiceEvent);
+            });
+            */
 
             connect();
         </script>
