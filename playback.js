@@ -289,6 +289,28 @@ function handle_source_closed(e)
     p.log_err('Audio source unexpectedly closed.');
 }
 
+function condense_playback_queue(queue)
+{
+    if (queue.length == 1)
+        return queue.shift();
+
+    var len = 0;
+    var i = 0;
+    for (i = 0; i < queue.length; i++)
+        len += queue[i].byteLength;
+
+    var mb = new ArrayBuffer(len);
+    var tmp = new Uint8Array(mb);
+    len = 0;
+    for (i = 0; i < queue.length; i++)
+    {
+        tmp.set(new Uint8Array(queue[i]), len);
+        len += queue[i].byteLength;
+    }
+    queue.length = 0;
+    return mb;
+}
+
 function handle_append_buffer_done(e)
 {
     var p = this.spiceconn;
@@ -298,7 +320,7 @@ function handle_append_buffer_done(e)
 
     if (p.queue.length > 0)
     {
-        var mb = p.queue.shift();
+        var mb = condense_playback_queue(p.queue);
         playback_append_buffer(p, mb);
     }
     else
