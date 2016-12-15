@@ -535,7 +535,7 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
     if (msg.type == SPICE_MSG_DISPLAY_STREAM_CREATE)
     {
         var m = new SpiceMsgDisplayStreamCreate(msg.data);
-        STREAM_DEBUG > 0 && console.log(this.type + ": MsgStreamCreate id" + m.id +
+        STREAM_DEBUG > 0 && console.log(this.type + ": MsgStreamCreate id" + m.id + "; type " + m.codec_type +
                                         "; width " + m.stream_width + "; height " + m.stream_height +
                                         "; left " + m.dest.left + "; top " + m.dest.top
                                         );
