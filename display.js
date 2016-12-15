@@ -1185,7 +1185,7 @@ function video_handle_event_debug(e)
     if (STREAM_DEBUG > 1 && s.source_buffer)
         console.log("  source_buffer " + dump_source_buffer(s.source_buffer));
 
-    if (STREAM_DEBUG > 0 || s.queue.length > 1)
+    if (STREAM_DEBUG > 1 || s.queue.length > 1)
         console.log('  queue len ' + s.queue.length + '; append_okay: ' + s.append_okay);
 }
 
