@@ -1203,10 +1203,11 @@ function listen_for_video_events(stream)
     var video_1_events = [
         "loadstart", "suspend", "emptied", "stalled", "loadedmetadata", "loadeddata", "canplay",
         "canplaythrough", "playing", "waiting", "seeking", "seeked", "ended", "durationchange",
-        "timeupdate", "play", "pause", "ratechange"
+        "play", "pause", "ratechange"
     ];
 
     var video_2_events = [
+        "timeupdate",
         "progress",
         "resize",
         "volumechange"
