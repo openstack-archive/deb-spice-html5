@@ -1114,6 +1114,14 @@ function handle_append_video_buffer_done(e)
         return;
     }
 
+    if (stream.video.buffered.length > 0 &&
+        stream.video.currentTime < stream.video.buffered.start(stream.video.buffered.length - 1))
+    {
+        console.log("Video appears to have fallen behind; advancing to " +
+            stream.video.buffered.start(stream.video.buffered.length - 1));
+        stream.video.currentTime = stream.video.buffered.start(stream.video.buffered.length - 1);
+    }
+
     if (STREAM_DEBUG > 1)
         console.log(stream.video.currentTime + ":id " +  stream.id + " updateend " + dump_media_element(stream.video));
 }
