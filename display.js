@@ -1106,6 +1106,12 @@ function handle_append_video_buffer_done(e)
     {
         stream.append_okay = true;
     }
+
+    if (!stream.video)
+    {
+        if (STREAM_DEBUG > 0)
+            console.log("Stream id " + stream.id + " received updateend after video is gone.");
+    }
 }
 
 function handle_video_buffer_error(e)
