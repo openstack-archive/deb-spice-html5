@@ -1111,7 +1111,11 @@ function handle_append_video_buffer_done(e)
     {
         if (STREAM_DEBUG > 0)
             console.log("Stream id " + stream.id + " received updateend after video is gone.");
+        return;
     }
+
+    if (STREAM_DEBUG > 1)
+        console.log(stream.video.currentTime + ":id " +  stream.id + " updateend " + dump_media_element(stream.video));
 }
 
 function handle_video_buffer_error(e)
