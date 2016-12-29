@@ -582,7 +582,9 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
             media.spiceconn = this;
             v.spice_stream = s;
         }
-        else if (m.codec_type != SPICE_VIDEO_CODEC_TYPE_MJPEG)
+        else if (m.codec_type == SPICE_VIDEO_CODEC_TYPE_MJPEG)
+            this.streams[m.id].frames_loading = 0;
+        else
             console.log("Unhandled stream codec: "+m.codec_type);
         return true;
     }
@@ -884,6 +886,9 @@ function handle_draw_jpeg_onload()
     var temp_canvas = null;
     var context;
 
+    if (this.o.sc.streams[this.o.id])
+        this.o.sc.streams[this.o.id].frames_loading--;
+
     /*------------------------------------------------------------
     ** FIXME:
     **  The helper should be extended to be able to handle actual HtmlImageElements
@@ -970,7 +975,10 @@ function handle_draw_jpeg_onload()
 
 function process_mjpeg_stream_data(sc, m, time_until_due)
 {
-    if (time_until_due < 0)
+    /* If we are currently processing an mjpeg frame when a new one arrives,
+       and the new one is 'late', drop the new frame.  This helps the browsers
+       keep up, and provides rate control feedback as well */
+    if (time_until_due < 0 && sc.streams[m.base.id].frames_loading > 0)
     {
         if ("report" in sc.streams[m.base.id])
             sc.streams[m.base.id].report.num_drops++;
@@ -1001,6 +1009,8 @@ function process_mjpeg_stream_data(sc, m, time_until_due)
         };
     img.onload = handle_draw_jpeg_onload;
     img.src = tmpstr;
+
+    sc.streams[m.base.id].frames_loading++;
 }
 
 function process_stream_data_report(sc, id, msg_mmtime, time_until_due)
