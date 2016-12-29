@@ -933,6 +933,7 @@ function handle_draw_jpeg_onload()
 
         // Give the Garbage collector a clue to recycle this; avoids
         //  fairly massive memory leaks during video playback
+        this.onload = undefined;
         this.src = EMPTY_GIF_IMAGE;
 
         if (this.o.descriptor &&
