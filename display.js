@@ -288,9 +288,6 @@ SpiceDisplayConn.prototype.process_channel_message = function(msg)
                     return false;
                 }
 
-                if (draw_copy.data.src_bitmap.lz_rgb.top_down != 1)
-                    this.log_warn("FIXME: Implement non top down support for lz_rgb");
-
                 var source_img = convert_spice_lz_to_web(canvas.context,
                                             draw_copy.data.src_bitmap.lz_rgb);
                 if (! source_img)
