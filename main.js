@@ -145,7 +145,12 @@ SpiceMainConn.prototype.process_channel_message = function(msg)
                         chan_id : chans.channels[i].id
                     };
             if (chans.channels[i].type == SPICE_CHANNEL_DISPLAY)
-                this.display = new SpiceDisplayConn(conn);
+            {
+                if (this.display !== undefined)
+                    this.log_warn("The spice-html5 client does not handle multiple heads.");
+                else
+                    this.display = new SpiceDisplayConn(conn);
+            }
             else if (chans.channels[i].type == SPICE_CHANNEL_INPUTS)
             {
                 this.inputs = new SpiceInputsConn(conn);
