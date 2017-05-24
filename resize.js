@@ -33,17 +33,17 @@
 function resize_helper(sc)
 {
     var w = document.getElementById(sc.screen_id).clientWidth;
-    var h = document.getElementById(sc.screen_id).clientHeight;
-
     var m = document.getElementById(sc.message_id);
 
     /* Resize vertically; basically we leave a 20 pixel margin
          at the bottom, and use the position of the message window
          to figure out how to resize */
-    var hd = window.innerHeight - m.offsetHeight - m.offsetTop - 20;
+
+    /* Show both div elements - spice-area and message-div */
+    var h = window.innerHeight - m.offsetHeight - m.clientHeight - 20;
+
 
     /* Xorg requires height be a multiple of 8; round up */
-    h = h + hd;
     if (h % 8 > 0)
         h += (8 - (h % 8));
 
