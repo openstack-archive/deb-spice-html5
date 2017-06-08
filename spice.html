@@ -143,6 +143,23 @@
                 }
             }
 
+            function toggle_console()
+            {
+                var checkbox = document.getElementById('show_console');
+                var m = document.getElementById('message-div');
+
+                if (checkbox.checked)
+                {
+                    m.style.display = 'block';
+                }
+                else
+                {
+                    m.style.display = 'none';
+                }
+
+                window.addEventListener('resize', handle_resize);
+                resize_helper(sc);
+            }
             /* SPICE port event listeners
             window.addEventListener('spice-port-data', function(event) {
                 // Here we convert data to text, but really we can obtain binary data also
@@ -166,6 +183,7 @@
             <label for="host">Host:</label> <input type='text' id='host' value='localhost'> <!-- localhost -->
             <label for="port">Port:</label> <input type='text' id='port' value='5959'>
             <label for="password">Password:</label> <input type='password' id='password' value=''>
+            <label for="show_console">Show console </label><input type="checkbox" id="show_console" value="1" onchange="toggle_console()" checked>
             <button id="connectButton" onclick="connect();">Start</button>
         </div>
 
